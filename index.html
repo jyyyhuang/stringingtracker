@@ -139,7 +139,7 @@ button {
   border-radius: 10px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.12);
 
-  max-height: 180px;
+  max-height: 220px;
   overflow-y: auto;
 
   display: none;
@@ -150,6 +150,13 @@ button {
   padding: 10px;
   border-bottom: 1px solid #eee;
   font-size: 14px;
+}
+
+.section-title {
+  font-size: 11px;
+  color: #888;
+  padding: 6px 10px;
+  background: #fafafa;
 }
 
 </style>
@@ -260,12 +267,14 @@ const el = {
 };
 
 /* =========================
-   STATE (CONTACTS MODE)
+   STATE
 ========================= */
 
-let clientIndex = [];
-let suppressAutocomplete = false;
 let timer;
+let suppressAutocomplete = false;
+
+let recentCustomers =
+JSON.parse(localStorage.getItem("recent_customers") || "[]");
 
 /* =========================
    API
@@ -285,74 +294,84 @@ return fetch(url).then(r => r.json());
 }
 
 /* =========================
-   PRELOAD CLIENTS (ONCE)
+   RECENTS TRACKING
 ========================= */
 
-async function preloadClients() {
+function updateRecents(name) {
 
-const cache = localStorage.getItem("clients_cache");
+if (!name) return;
 
-if (cache) {
-clientIndex = JSON.parse(cache);
-return;
-}
+recentCustomers = recentCustomers.filter(n => n !== name);
+recentCustomers.unshift(name);
+recentCustomers = recentCustomers.slice(0, 8);
 
-const res = await api({
-action: "searchClients",
-query: ""
-});
-
-if (Array.isArray(res)) {
-clientIndex = res;
-localStorage.setItem("clients_cache", JSON.stringify(res));
-}
+localStorage.setItem("recent_customers", JSON.stringify(recentCustomers));
 
 }
-
-preloadClients();
-
-/* optional background refresh */
-setInterval(async () => {
-
-const res = await api({
-action: "searchClients",
-query: ""
-});
-
-if (Array.isArray(res)) {
-clientIndex = res;
-localStorage.setItem("clients_cache", JSON.stringify(res));
-}
-
-}, 60000);
 
 /* =========================
-   INSTANT SEARCH (NO API)
+   AUTOCOMPLETE (RECENTS FIRST)
 ========================= */
+
+el.name.addEventListener("focus", () => {
+renderList(el.name.value.trim());
+});
 
 el.name.addEventListener("input", () => {
 
 if (suppressAutocomplete) return;
 
-clearTimeout(timer);
+const q = el.name.value.trim();
 
-const q = el.name.value.trim().toLowerCase();
-
-if (!q) {
-el.suggestions.style.display = "none";
-return;
-}
-
-/* LOCAL FILTER ONLY */
-const results = clientIndex.filter(n =>
-n.toLowerCase().includes(q)
-);
-
-render(results.slice(0, 8));
+renderList(q);
 
 });
 
-function render(list) {
+function renderList(query) {
+
+el.suggestions.innerHTML = "";
+
+let results = [];
+
+/* STEP 1: RECENTS FIRST */
+if (!query) {
+results = recentCustomers;
+} else {
+results = recentCustomers.filter(n =>
+n.toLowerCase().includes(query.toLowerCase())
+);
+}
+
+/* STEP 2: fallback API if nothing found */
+if (results.length === 0 && query) {
+
+api({
+action: "searchClients",
+query
+}).then(data => {
+renderAPI(data);
+});
+
+return;
+}
+
+renderLocal(results);
+
+}
+
+function renderLocal(list) {
+
+renderListUI(list, true);
+
+}
+
+function renderAPI(list) {
+
+renderListUI(list, false);
+
+}
+
+function renderListUI(list, isLocal) {
 
 el.suggestions.innerHTML = "";
 
@@ -361,10 +380,15 @@ el.suggestions.style.display = "none";
 return;
 }
 
-list.forEach(n => {
+/* optional label */
+el.suggestions.innerHTML =
+"<div class='section-title'>" +
+(isLocal ? "Recent" : "Search Results") +
+"</div>";
+
+list.slice(0, 8).forEach(n => {
 
 const div = document.createElement("div");
-
 div.textContent = n;
 
 div.onclick = () => {
@@ -375,6 +399,8 @@ el.name.value = n;
 el.suggestions.style.display = "none";
 
 load(n);
+
+updateRecents(n);
 
 setTimeout(() => {
   suppressAutocomplete = false;
@@ -390,7 +416,7 @@ el.suggestions.style.display = "block";
 
 }
 
-/* hide dropdown */
+/* hide */
 el.name.addEventListener("blur", () => {
 setTimeout(() => {
 el.suggestions.style.display = "none";
@@ -409,8 +435,8 @@ el.string.value = "";
 el.tension.value = "";
 el.type.value = "";
 
-const cacheKey = "history_" + nameVal;
-const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+const cached =
+JSON.parse(localStorage.getItem("history_" + nameVal) || "null");
 
 if (cached) {
 fill(cached);
@@ -424,7 +450,7 @@ name: nameVal
 
 if (!d) return;
 
-localStorage.setItem(cacheKey, JSON.stringify(d));
+localStorage.setItem("history_" + nameVal, JSON.stringify(d));
 
 fill(d);
 
@@ -471,13 +497,15 @@ return;
 
 el.msg.innerText = payload.client_name + " saved";
 
+updateRecents(payload.client_name);
+
 el.form.reset();
 el.suggestions.style.display = "none";
 
 });
 
 /* =========================
-   CLEAR FORM
+   CLEAR
 ========================= */
 
 el.clearBtn.addEventListener("click", () => {
