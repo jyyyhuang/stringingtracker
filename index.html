@@ -11,7 +11,7 @@ maximum-scale=1,
 user-scalable=no,
 viewport-fit=cover">
 
-<title>🏸 Stringing Tracker 🏸</title>
+<title>🏸 Stringing Tracker</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
@@ -39,10 +39,8 @@ html, body {
 }
 
 .app {
-
   width: 100%;
-  max-width: 460px;
-
+  max-width: 480px;
   height: 100dvh;
 
   margin: 0 auto;
@@ -132,7 +130,6 @@ input, select, textarea {
 
 textarea {
   min-height: 60px;
-  resize: none;
 }
 
 .footer {
@@ -177,7 +174,7 @@ button {
   color: green;
 }
 
-/* AUTOCOMPLETE */
+/* autocomplete */
 
 .autocomplete {
   position: relative;
@@ -224,7 +221,7 @@ button {
 
 <div class="app">
 
-<div class="header">🏸 Stringing Tracker 🏸</div>
+<div class="header">🏸 Stringing Tracker</div>
 
 <form id="form">
 
@@ -239,7 +236,7 @@ button {
 
 </div>
 
-<!-- CLUB / RACKET -->
+<!-- ROW -->
 <div class="card row">
 
 <div>
@@ -254,7 +251,6 @@ button {
 
 </div>
 
-<!-- STRING / TENSION -->
 <div class="card row">
 
 <div>
@@ -269,7 +265,6 @@ button {
 
 </div>
 
-<!-- PAID / TYPE -->
 <div class="card row">
 
 <div>
@@ -291,7 +286,6 @@ button {
 
 </div>
 
-<!-- NOTES -->
 <div class="card">
 
 <label>Notes</label>
@@ -304,7 +298,6 @@ button {
 <div class="footer">
 
 <button type="submit">Submit</button>
-
 <div id="msg" class="msg"></div>
 
 </div>
@@ -321,27 +314,25 @@ const API_URL =
 const API_KEY = "my-secret-key";
 
 /* =========================
-   SAFE POST (NO CORS PRE-FLIGHT)
+   SAFE GET API WRAPPER
 ========================= */
 
-async function api(payload) {
+function api(params) {
 
-  const formData = new URLSearchParams();
+const url =
+API_URL + "?" +
+new URLSearchParams({
+  key: API_KEY,
+  ...params
+});
 
-  formData.append("payload", JSON.stringify(payload));
+return fetch(url)
+.then(r => r.json());
 
-  const res = await fetch(API_URL, {
-    method: "POST",
-    body: formData
-  });
-
-  const text = await res.text();
-
-  return JSON.parse(text);
 }
 
 /* =========================
-   AUTOCOMPLETE
+   AUTOCOMPLETE (DEBOUNCED)
 ========================= */
 
 let timer;
@@ -361,19 +352,18 @@ timer = setTimeout(async () => {
 
 try {
 
-const res = await api({
-key: API_KEY,
+const data = await api({
 action: "searchClients",
 query: q
 });
 
-render(res);
+render(data);
 
 } catch(e) {
 console.log(e);
 }
 
-}, 300);
+}, 250);
 
 });
 
@@ -388,17 +378,17 @@ return;
 
 list.forEach(n => {
 
-const d = document.createElement("div");
+const div = document.createElement("div");
 
-d.textContent = n;
+div.textContent = n;
 
-d.onclick = () => {
+div.onclick = () => {
 name.value = n;
 suggestions.style.display = "none";
 load(n);
 };
 
-suggestions.appendChild(d);
+suggestions.appendChild(div);
 
 });
 
@@ -414,7 +404,6 @@ async function load(nameVal) {
 try {
 
 const d = await api({
-key: API_KEY,
 action: "getClientHistory",
 name: nameVal
 });
@@ -429,6 +418,7 @@ d?.special_case || "";
 
 } catch(e) {
 console.log(e);
+msg.innerText = "Prefill failed";
 }
 
 }
@@ -443,17 +433,17 @@ e.preventDefault();
 
 msg.innerText = "Submitting...";
 
-try {
-
 const data =
 Object.fromEntries(
 new FormData(form).entries()
 );
 
-data.key = API_KEY;
-data.action = "submit";
+try {
 
-const res = await api(data);
+const res = await api({
+action: "submit",
+...data
+});
 
 if (res?.error) {
 msg.innerText = res.error;
@@ -471,8 +461,7 @@ suggestions.style.display = "none";
 
 console.log(e);
 
-msg.innerText =
-"Connection error";
+msg.innerText = "Connection error";
 
 }
 
