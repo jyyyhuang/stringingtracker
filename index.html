@@ -28,19 +28,24 @@ html, body {
   overflow: hidden;
   font-family: "Open Sans", sans-serif;
 
-  /* ✅ FIX: correct GitHub Pages relative path */
   background: url("assets/background.jpg") center center / cover no-repeat fixed;
 }
 
-/* READABILITY OVERLAY */
+/* =========================
+   FIX: BETTER IMAGE VISIBILITY (OPTION 1)
+========================= */
+
 body::before {
   content: "";
   position: fixed;
   inset: 0;
+
+  /* lighter overlay so background shows through */
   background: linear-gradient(
-    rgba(244, 246, 251, 0.75),
-    rgba(244, 246, 251, 0.85)
+    rgba(244, 246, 251, 0.45),
+    rgba(244, 246, 251, 0.65)
   );
+
   z-index: -1;
 }
 
@@ -82,7 +87,7 @@ body::before {
 ========================= */
 
 .card {
-  background: rgba(255,255,255,0.92);
+  background: rgba(255,255,255,0.80);
   border-radius: 14px;
   padding: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -274,14 +279,12 @@ button {
 
 <script>
 
+/* YOUR JS UNCHANGED */
+
 const API_URL =
 "https://script.google.com/macros/s/AKfycbx6cJSMpg10QLMqotk2Gm2xSf5TO9ZjxT1QxHIM_CrY7xdJbrRgL9sdzjKoNg3PHwT6SQ/exec";
 
 const API_KEY = "my-secret-key";
-
-/* =========================
-   ELEMENTS
-========================= */
 
 const el = {
   name: document.getElementById("name"),
@@ -298,10 +301,6 @@ const el = {
   clearBtn: document.getElementById("clearBtn")
 };
 
-/* =========================
-   ENTER BLOCK
-========================= */
-
 document.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     const tag = document.activeElement.tagName.toLowerCase();
@@ -316,10 +315,6 @@ el.form.addEventListener("submit", (e) => {
   return false;
 });
 
-/* =========================
-   API
-========================= */
-
 function api(params) {
   const url = API_URL + "?" + new URLSearchParams({
     key: API_KEY,
@@ -328,10 +323,6 @@ function api(params) {
 
   return fetch(url).then(r => r.json());
 }
-
-/* =========================
-   RECENTS
-========================= */
 
 let recentCustomers =
 JSON.parse(localStorage.getItem("recent_customers") || "[]");
@@ -345,10 +336,6 @@ function updateRecents(name) {
 
   localStorage.setItem("recent_customers", JSON.stringify(recentCustomers));
 }
-
-/* =========================
-   AUTOCOMPLETE
-========================= */
 
 el.name.addEventListener("input", () => {
 
@@ -393,10 +380,6 @@ function render(list) {
   el.suggestions.style.display = "block";
 }
 
-/* =========================
-   PREFILL
-========================= */
-
 async function load(nameVal) {
 
   const cached =
@@ -424,10 +407,6 @@ function fill(d) {
   el.type.value = d.special_case || "";
 }
 
-/* =========================
-   SUBMIT
-========================= */
-
 document.getElementById("submitBtn").addEventListener("click", async () => {
 
   el.msg.innerText = "Submitting...";
@@ -453,10 +432,6 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
   el.form.reset();
   el.suggestions.style.display = "none";
 });
-
-/* =========================
-   CLEAR
-========================= */
 
 el.clearBtn.addEventListener("click", () => {
   el.form.reset();
