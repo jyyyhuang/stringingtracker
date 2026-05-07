@@ -11,7 +11,7 @@ maximum-scale=1,
 user-scalable=no,
 viewport-fit=cover">
 
-<title>🏸 Stringing Tracker 🏸</title>
+<title>🏸 Stringing Tracker</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
@@ -31,7 +31,6 @@ html, body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* APP LAYOUT */
 .app {
   max-width: 520px;
   height: 100dvh;
@@ -41,7 +40,6 @@ html, body {
   flex-direction: column;
 }
 
-/* HEADER */
 .header {
   text-align: center;
   font-size: 22px;
@@ -49,7 +47,6 @@ html, body {
   padding: 10px;
 }
 
-/* CONTENT SCROLL AREA */
 .content {
   flex: 1;
   overflow-y: auto;
@@ -57,10 +54,8 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 0;
 }
 
-/* CARD */
 .card {
   background: white;
   border-radius: 14px;
@@ -90,7 +85,6 @@ input, select, textarea {
   font-size: 16px;
   border-radius: 10px;
   border: 1px solid #ddd;
-  outline: none;
 }
 
 textarea {
@@ -98,10 +92,8 @@ textarea {
   resize: none;
 }
 
-/* FOOTER FIXED */
+/* FOOTER */
 .footer {
-  flex-shrink: 0;
-
   padding: 10px;
   background: #f4f6fb;
 
@@ -110,7 +102,6 @@ textarea {
   gap: 8px;
 }
 
-/* BUTTONS */
 button {
   width: 100%;
   border: none;
@@ -130,11 +121,9 @@ button {
   color: #333;
 }
 
-/* MESSAGE */
 .msg {
   text-align: center;
   font-size: 12px;
-  margin-top: 2px;
 }
 
 /* AUTOCOMPLETE */
@@ -233,16 +222,12 @@ button {
 
 </div>
 
-<!-- FIXED FOOTER -->
 <div class="footer">
 
-  <button class="submitBtn" type="submit">Submit</button>
+<button class="submitBtn" type="submit">Submit</button>
+<button class="clearBtn" type="button" id="clearBtn">Clear Form</button>
 
-  <button class="clearBtn" type="button" id="clearBtn">
-    Clear Form
-  </button>
-
-  <div class="msg" id="msg"></div>
+<div class="msg" id="msg"></div>
 
 </div>
 
@@ -258,7 +243,7 @@ const API_URL =
 const API_KEY = "my-secret-key";
 
 /* =========================
-   ELEMENTS
+   STATE
 ========================= */
 
 const el = {
@@ -275,6 +260,13 @@ const el = {
   suggestions: document.getElementById("suggestions"),
   clearBtn: document.getElementById("clearBtn")
 };
+
+/* =========================
+   AUTOCOMPLETE FIX STATE
+========================= */
+
+let timer;
+let suppressAutocomplete = false;
 
 /* =========================
    API
@@ -294,12 +286,12 @@ return fetch(url).then(r => r.json());
 }
 
 /* =========================
-   AUTOCOMPLETE
+   AUTOCOMPLETE (FIXED)
 ========================= */
 
-let timer;
-
 el.name.addEventListener("input", () => {
+
+if (suppressAutocomplete) return;
 
 clearTimeout(timer);
 
@@ -339,9 +331,19 @@ const div = document.createElement("div");
 div.textContent = n;
 
 div.onclick = () => {
-  el.name.value = n;
-  el.suggestions.style.display = "none";
-  load(n);
+
+suppressAutocomplete = true;
+
+el.name.value = n;
+
+el.suggestions.style.display = "none";
+
+load(n);
+
+setTimeout(() => {
+  suppressAutocomplete = false;
+}, 400);
+
 };
 
 el.suggestions.appendChild(div);
@@ -351,6 +353,13 @@ el.suggestions.appendChild(div);
 el.suggestions.style.display = "block";
 
 }
+
+/* hide on blur */
+el.name.addEventListener("blur", () => {
+setTimeout(() => {
+el.suggestions.style.display = "none";
+}, 150);
+});
 
 /* =========================
    PREFILL
@@ -410,7 +419,7 @@ el.suggestions.style.display = "none";
 });
 
 /* =========================
-   CLEAR FORM (FIXED)
+   CLEAR FORM
 ========================= */
 
 el.clearBtn.addEventListener("click", () => {
