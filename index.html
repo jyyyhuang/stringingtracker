@@ -40,7 +40,7 @@ html, body {
 
 .app {
   width: 100%;
-  max-width: 480px;
+  max-width: 500px;
   height: 100dvh;
 
   margin: 0 auto;
@@ -130,6 +130,7 @@ input, select, textarea {
 
 textarea {
   min-height: 60px;
+  resize: none;
 }
 
 .footer {
@@ -174,7 +175,7 @@ button {
   color: green;
 }
 
-/* autocomplete */
+/* AUTOCOMPLETE */
 
 .autocomplete {
   position: relative;
@@ -236,7 +237,7 @@ button {
 
 </div>
 
-<!-- ROW -->
+<!-- ROW 1 -->
 <div class="card row">
 
 <div>
@@ -251,6 +252,7 @@ button {
 
 </div>
 
+<!-- ROW 2 -->
 <div class="card row">
 
 <div>
@@ -265,6 +267,7 @@ button {
 
 </div>
 
+<!-- ROW 3 -->
 <div class="card row">
 
 <div>
@@ -286,6 +289,7 @@ button {
 
 </div>
 
+<!-- NOTES -->
 <div class="card">
 
 <label>Notes</label>
@@ -298,6 +302,7 @@ button {
 <div class="footer">
 
 <button type="submit">Submit</button>
+
 <div id="msg" class="msg"></div>
 
 </div>
@@ -314,7 +319,7 @@ const API_URL =
 const API_KEY = "my-secret-key";
 
 /* =========================
-   SAFE GET API WRAPPER
+   SAFE GET WRAPPER
 ========================= */
 
 function api(params) {
@@ -363,7 +368,7 @@ render(data);
 console.log(e);
 }
 
-}, 250);
+}, 200);
 
 });
 
@@ -396,7 +401,7 @@ suggestions.style.display = "block";
 }
 
 /* =========================
-   PREFILL
+   PREFILL (LATEST DATA)
 ========================= */
 
 async function load(nameVal) {
@@ -417,8 +422,11 @@ document.querySelector('[name="special_case"]').value =
 d?.special_case || "";
 
 } catch(e) {
+
 console.log(e);
+
 msg.innerText = "Prefill failed";
+
 }
 
 }
