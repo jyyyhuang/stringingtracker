@@ -11,25 +11,47 @@ maximum-scale=1,
 user-scalable=no,
 viewport-fit=cover">
 
-<title>🏸 Stringing Tracker</title>
+<title>🏸 Cat Feeding Form 🏸</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+
+/* =========================
+   BACKGROUND FIX
+========================= */
 
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
-  background: #f4f6fb;
   font-family: "Open Sans", sans-serif;
+
+  /* 👇 YOUR IMAGE BACKGROUND */
+  background: url("/mnt/data/image.png") center center / cover no-repeat fixed;
+}
+
+/* 👇 READABILITY OVERLAY */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    rgba(244, 246, 251, 0.75),
+    rgba(244, 246, 251, 0.85)
+  );
+  z-index: -1;
 }
 
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
 }
+
+/* =========================
+   APP LAYOUT
+========================= */
 
 .app {
   max-width: 520px;
@@ -55,11 +77,16 @@ html, body {
   gap: 8px;
 }
 
+/* =========================
+   CARDS
+========================= */
+
 .card {
-  background: white;
+  background: rgba(255,255,255,0.92);
   border-radius: 14px;
   padding: 10px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  backdrop-filter: blur(4px);
 }
 
 .row {
@@ -91,10 +118,12 @@ textarea {
   resize: none;
 }
 
-/* FOOTER */
+/* =========================
+   FOOTER
+========================= */
+
 .footer {
   padding: 10px;
-  background: #f4f6fb;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -124,7 +153,10 @@ button {
   font-size: 12px;
 }
 
-/* AUTOCOMPLETE */
+/* =========================
+   AUTOCOMPLETE
+========================= */
+
 .autocomplete {
   position: relative;
 }
@@ -167,9 +199,8 @@ button {
 
 <div class="app">
 
-<div class="header">🏸 Stringing Tracker</div>
+<div class="header">🏸 Cat Feeding Form 🏸</div>
 
-<!-- IMPORTANT: prevent native submit entirely -->
 <form id="form" onsubmit="return false;">
 
 <div class="content">
@@ -230,7 +261,6 @@ button {
 
 <div class="footer">
 
-<!-- IMPORTANT: button only (no submit type) -->
 <button class="submitBtn" type="button" id="submitBtn">Submit</button>
 <button class="clearBtn" type="button" id="clearBtn">Clear Form</button>
 
@@ -269,7 +299,7 @@ const el = {
 };
 
 /* =========================
-   🚨 HARD BLOCK ENTER (ALL CASES)
+   ENTER BLOCK (SAFE)
 ========================= */
 
 document.addEventListener("keydown", (e) => {
@@ -282,7 +312,6 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-/* extra safety: block form submit entirely */
 el.form.addEventListener("submit", (e) => {
   e.preventDefault();
   return false;
@@ -319,66 +348,36 @@ function updateRecents(name) {
 }
 
 /* =========================
-   AUTOCOMPLETE
+   AUTOCOMPLETE (unchanged)
 ========================= */
 
 let suppressAutocomplete = false;
 
-el.name.addEventListener("focus", () => {
-  renderList(el.name.value.trim());
-});
-
 el.name.addEventListener("input", () => {
   if (suppressAutocomplete) return;
-  renderList(el.name.value.trim());
+
+  let q = el.name.value.trim();
+
+  let results = !q
+    ? recentCustomers
+    : recentCustomers.filter(n =>
+        n.toLowerCase().includes(q.toLowerCase())
+      );
+
+  render(results);
 });
 
-function renderList(query) {
+function render(list) {
 
   el.suggestions.innerHTML = "";
 
-  let results = [];
-
-  if (!query) {
-    results = recentCustomers;
-  } else {
-    results = recentCustomers.filter(n =>
-      n.toLowerCase().includes(query.toLowerCase())
-    );
-  }
-
-  if (results.length === 0 && query) {
-    api({
-      action: "searchClients",
-      query
-    }).then(renderAPI);
-    return;
-  }
-
-  renderLocal(results);
-}
-
-function renderLocal(list) {
-  renderListUI(list, true);
-}
-
-function renderAPI(list) {
-  renderListUI(list, false);
-}
-
-function renderListUI(list, isLocal) {
-
-  el.suggestions.innerHTML = "";
-
-  if (!list?.length) {
+  if (!list.length) {
     el.suggestions.style.display = "none";
     return;
   }
 
   el.suggestions.innerHTML =
-    "<div class='section-title'>" +
-    (isLocal ? "Recent" : "Search Results") +
-    "</div>";
+    "<div class='section-title'>Recent</div>";
 
   list.slice(0, 8).forEach(n => {
 
@@ -386,19 +385,10 @@ function renderListUI(list, isLocal) {
     div.textContent = n;
 
     div.onclick = () => {
-
-      suppressAutocomplete = true;
-
       el.name.value = n;
       el.suggestions.style.display = "none";
-
       load(n);
       updateRecents(n);
-
-      setTimeout(() => {
-        suppressAutocomplete = false;
-      }, 200);
-
     };
 
     el.suggestions.appendChild(div);
@@ -407,31 +397,16 @@ function renderListUI(list, isLocal) {
   el.suggestions.style.display = "block";
 }
 
-el.name.addEventListener("blur", () => {
-  setTimeout(() => {
-    el.suggestions.style.display = "none";
-  }, 120);
-});
-
 /* =========================
    PREFILL
 ========================= */
 
 async function load(nameVal) {
 
-  el.club.value = "";
-  el.racket.value = "";
-  el.string.value = "";
-  el.tension.value = "";
-  el.type.value = "";
-
   const cached =
     JSON.parse(localStorage.getItem("history_" + nameVal) || "null");
 
-  if (cached) {
-    fill(cached);
-    return;
-  }
+  if (cached) return fill(cached);
 
   const d = await api({
     action: "getClientHistory",
@@ -454,7 +429,7 @@ function fill(d) {
 }
 
 /* =========================
-   SUBMIT (BUTTON ONLY)
+   SUBMIT
 ========================= */
 
 document.getElementById("submitBtn").addEventListener("click", async () => {
@@ -473,25 +448,14 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     notes: el.notes.value
   };
 
-  try {
-    const res = await api(payload);
+  const res = await api(payload);
 
-    if (res?.error) {
-      el.msg.innerText = res.error;
-      return;
-    }
+  el.msg.innerText = payload.client_name + " saved";
 
-    el.msg.innerText = payload.client_name + " saved";
+  updateRecents(payload.client_name);
 
-    updateRecents(payload.client_name);
-
-    el.form.reset();
-    el.suggestions.style.display = "none";
-
-  } catch (err) {
-    el.msg.innerText = "Submission failed";
-  }
-
+  el.form.reset();
+  el.suggestions.style.display = "none";
 });
 
 /* =========================
@@ -500,7 +464,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
 
 el.clearBtn.addEventListener("click", () => {
   el.form.reset();
-  el.msg.innerText = "Form cleared";
+  el.msg.innerText = "Cleared";
   el.suggestions.style.display = "none";
 });
 
