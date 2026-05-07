@@ -18,7 +18,7 @@ viewport-fit=cover">
 <style>
 
 /* =========================
-   BACKGROUND FIX (GITHUB PAGES)
+   BACKGROUND
 ========================= */
 
 html, body {
@@ -28,25 +28,17 @@ html, body {
   overflow: hidden;
   font-family: "Open Sans", sans-serif;
 
-  background: url("assets/background.jpg") center center / cover no-repeat fixed;
-}
+  background:
+    linear-gradient(
+      rgba(244,246,251,0.72),
+      rgba(244,246,251,0.82)
+    ),
+    url("image.png");
 
-/* =========================
-   FIX: BETTER IMAGE VISIBILITY (OPTION 1)
-========================= */
-
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-
-  /* lighter overlay so background shows through */
-  background: linear-gradient(
-    rgba(244, 246, 251, 0.45),
-    rgba(244, 246, 251, 0.65)
-  );
-
-  z-index: -1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 * {
@@ -55,7 +47,7 @@ body::before {
 }
 
 /* =========================
-   APP LAYOUT
+   APP
 ========================= */
 
 .app {
@@ -70,8 +62,12 @@ body::before {
   text-align: center;
   font-size: 22px;
   font-weight: 800;
-  padding: 10px;
+  padding: 12px;
 }
+
+/* =========================
+   CONTENT
+========================= */
 
 .content {
   flex: 1;
@@ -83,15 +79,15 @@ body::before {
 }
 
 /* =========================
-   CARDS
+   CARD
 ========================= */
 
 .card {
-  background: rgba(255,255,255,0.80);
+  background: rgba(255,255,255,0.90);
+  backdrop-filter: blur(6px);
   border-radius: 14px;
   padding: 10px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
 .row {
@@ -103,6 +99,10 @@ body::before {
   flex: 1;
 }
 
+/* =========================
+   FORM
+========================= */
+
 label {
   font-size: 12px;
   font-weight: 700;
@@ -110,12 +110,15 @@ label {
   display: block;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   padding: 10px;
   font-size: 16px;
   border-radius: 10px;
   border: 1px solid #ddd;
+  background: rgba(255,255,255,0.95);
 }
 
 textarea {
@@ -149,7 +152,7 @@ button {
 }
 
 .clearBtn {
-  background: #e5e5e5;
+  background: rgba(255,255,255,0.9);
   color: #333;
 }
 
@@ -189,6 +192,10 @@ button {
   font-size: 14px;
 }
 
+.suggestions div:last-child {
+  border-bottom: none;
+}
+
 .section-title {
   font-size: 11px;
   color: #888;
@@ -211,36 +218,48 @@ button {
 <div class="content">
 
 <div class="card autocomplete">
+
   <label>Name</label>
-  <input id="name">
+
+  <input id="name" autocomplete="off">
+
   <div id="suggestions" class="suggestions"></div>
+
 </div>
 
 <div class="card row">
+
   <div>
     <label>Club</label>
     <input id="club">
   </div>
+
   <div>
     <label>Racket</label>
     <input id="racket">
   </div>
+
 </div>
 
 <div class="card row">
+
   <div>
     <label>String</label>
     <input id="string">
   </div>
+
   <div>
     <label>Tension</label>
     <input id="tension">
   </div>
+
 </div>
 
 <div class="card row">
+
   <div>
     <label>Paid</label>
+
     <select id="paid">
       <option>Yes</option>
       <option>Pending</option>
@@ -249,25 +268,35 @@ button {
 
   <div>
     <label>Type</label>
+
     <select id="type">
       <option value="">—</option>
       <option value="1 String">1 String</option>
       <option value="Cross -1">Cross -1</option>
     </select>
   </div>
+
 </div>
 
 <div class="card">
+
   <label>Notes</label>
+
   <textarea id="notes"></textarea>
+
 </div>
 
 </div>
 
 <div class="footer">
 
-<button class="submitBtn" type="button" id="submitBtn">Submit</button>
-<button class="clearBtn" type="button" id="clearBtn">Clear Form</button>
+<button class="submitBtn" type="button" id="submitBtn">
+Submit
+</button>
+
+<button class="clearBtn" type="button" id="clearBtn">
+Clear Form
+</button>
 
 <div class="msg" id="msg"></div>
 
@@ -279,12 +308,14 @@ button {
 
 <script>
 
-/* YOUR JS UNCHANGED */
-
 const API_URL =
 "https://script.google.com/macros/s/AKfycbx6cJSMpg10QLMqotk2Gm2xSf5TO9ZjxT1QxHIM_CrY7xdJbrRgL9sdzjKoNg3PHwT6SQ/exec";
 
 const API_KEY = "my-secret-key";
+
+/* =========================
+   ELEMENTS
+========================= */
 
 const el = {
   name: document.getElementById("name"),
@@ -301,13 +332,24 @@ const el = {
   clearBtn: document.getElementById("clearBtn")
 };
 
+/* =========================
+   DISABLE ENTER SUBMIT
+========================= */
+
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    const tag = document.activeElement.tagName.toLowerCase();
-    if (tag === "textarea") return;
-    e.preventDefault();
-    return false;
-  }
+
+  if (e.key !== "Enter") return;
+
+  const tag =
+    document.activeElement.tagName.toLowerCase();
+
+  if (tag === "textarea") return;
+
+  e.preventDefault();
+  e.stopPropagation();
+
+  return false;
+
 });
 
 el.form.addEventListener("submit", (e) => {
@@ -315,77 +357,200 @@ el.form.addEventListener("submit", (e) => {
   return false;
 });
 
-function api(params) {
-  const url = API_URL + "?" + new URLSearchParams({
-    key: API_KEY,
-    ...params
-  });
+/* =========================
+   API
+========================= */
 
-  return fetch(url).then(r => r.json());
+function api(params) {
+
+  const url =
+    API_URL + "?" +
+    new URLSearchParams({
+      key: API_KEY,
+      ...params
+    });
+
+  return fetch(url)
+    .then(r => r.json());
+
 }
+
+/* =========================
+   RECENTS
+========================= */
 
 let recentCustomers =
-JSON.parse(localStorage.getItem("recent_customers") || "[]");
+JSON.parse(
+  localStorage.getItem("recent_customers") || "[]"
+);
 
 function updateRecents(name) {
+
   if (!name) return;
 
-  recentCustomers = recentCustomers.filter(n => n !== name);
-  recentCustomers.unshift(name);
-  recentCustomers = recentCustomers.slice(0, 8);
+  recentCustomers =
+    recentCustomers.filter(n => n !== name);
 
-  localStorage.setItem("recent_customers", JSON.stringify(recentCustomers));
+  recentCustomers.unshift(name);
+
+  recentCustomers =
+    recentCustomers.slice(0, 8);
+
+  localStorage.setItem(
+    "recent_customers",
+    JSON.stringify(recentCustomers)
+  );
+
 }
+
+/* =========================
+   AUTOCOMPLETE
+========================= */
+
+let suppressAutocomplete = false;
+
+el.name.addEventListener("focus", () => {
+  renderList(el.name.value.trim());
+});
 
 el.name.addEventListener("input", () => {
 
-  let q = el.name.value.trim();
+  if (suppressAutocomplete) return;
 
-  let results = !q
-    ? recentCustomers
-    : recentCustomers.filter(n =>
-        n.toLowerCase().includes(q.toLowerCase())
-      );
+  const q = el.name.value.trim();
 
-  render(results);
+  renderList(q);
+
 });
 
-function render(list) {
+function renderList(query) {
 
   el.suggestions.innerHTML = "";
 
-  if (!list.length) {
-    el.suggestions.style.display = "none";
+  let results = [];
+
+  /* recents first */
+  if (!query) {
+
+    results = recentCustomers;
+
+  } else {
+
+    results =
+      recentCustomers.filter(n =>
+        n.toLowerCase()
+         .includes(query.toLowerCase())
+      );
+
+  }
+
+  /* API fallback */
+  if (results.length === 0 && query) {
+
+    api({
+      action: "searchClients",
+      query
+    }).then(data => {
+      renderAPI(data);
+    });
+
     return;
   }
 
+  renderLocal(results);
+
+}
+
+function renderLocal(list) {
+  renderListUI(list, true);
+}
+
+function renderAPI(list) {
+  renderListUI(list, false);
+}
+
+function renderListUI(list, isLocal) {
+
+  el.suggestions.innerHTML = "";
+
+  if (!list?.length) {
+
+    el.suggestions.style.display = "none";
+    return;
+
+  }
+
   el.suggestions.innerHTML =
-    "<div class='section-title'>Recent</div>";
+    "<div class='section-title'>" +
+    (isLocal ? "Recent" : "Search Results") +
+    "</div>";
 
   list.slice(0, 8).forEach(n => {
 
-    const div = document.createElement("div");
+    const div =
+      document.createElement("div");
+
     div.textContent = n;
 
     div.onclick = () => {
+
+      suppressAutocomplete = true;
+
       el.name.value = n;
+
       el.suggestions.style.display = "none";
+
       load(n);
+
       updateRecents(n);
+
+      setTimeout(() => {
+        suppressAutocomplete = false;
+      }, 200);
+
     };
 
     el.suggestions.appendChild(div);
+
   });
 
   el.suggestions.style.display = "block";
+
 }
+
+el.name.addEventListener("blur", () => {
+
+  setTimeout(() => {
+    el.suggestions.style.display = "none";
+  }, 120);
+
+});
+
+/* =========================
+   PREFILL
+========================= */
 
 async function load(nameVal) {
 
-  const cached =
-    JSON.parse(localStorage.getItem("history_" + nameVal) || "null");
+  el.club.value = "";
+  el.racket.value = "";
+  el.string.value = "";
+  el.tension.value = "";
+  el.type.value = "";
 
-  if (cached) return fill(cached);
+  const cached =
+    JSON.parse(
+      localStorage.getItem(
+        "history_" + nameVal
+      ) || "null"
+    );
+
+  if (cached) {
+
+    fill(cached);
+    return;
+
+  }
 
   const d = await api({
     action: "getClientHistory",
@@ -394,25 +559,39 @@ async function load(nameVal) {
 
   if (!d) return;
 
-  localStorage.setItem("history_" + nameVal, JSON.stringify(d));
+  localStorage.setItem(
+    "history_" + nameVal,
+    JSON.stringify(d)
+  );
 
   fill(d);
+
 }
 
 function fill(d) {
+
   el.club.value = d.club || "";
   el.racket.value = d.racket || "";
   el.string.value = d.strings || "";
   el.tension.value = d.tension || "";
   el.type.value = d.special_case || "";
+
 }
 
-document.getElementById("submitBtn").addEventListener("click", async () => {
+/* =========================
+   SUBMIT
+========================= */
+
+document
+.getElementById("submitBtn")
+.addEventListener("click", async () => {
 
   el.msg.innerText = "Submitting...";
 
   const payload = {
+
     action: "submit",
+
     client_name: el.name.value,
     club: el.club.value,
     racquet_name: el.racket.value,
@@ -421,22 +600,49 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     paid: el.paid.value,
     special_case: el.type.value,
     notes: el.notes.value
+
   };
 
-  await api(payload);
+  try {
 
-  el.msg.innerText = payload.client_name + " saved";
+    const res = await api(payload);
 
-  updateRecents(payload.client_name);
+    if (res?.error) {
 
-  el.form.reset();
-  el.suggestions.style.display = "none";
+      el.msg.innerText = res.error;
+      return;
+
+    }
+
+    el.msg.innerText =
+      payload.client_name + " saved";
+
+    updateRecents(payload.client_name);
+
+    el.form.reset();
+
+    el.suggestions.style.display = "none";
+
+  } catch (err) {
+
+    el.msg.innerText = "Submission failed";
+
+  }
+
 });
 
+/* =========================
+   CLEAR
+========================= */
+
 el.clearBtn.addEventListener("click", () => {
+
   el.form.reset();
+
   el.msg.innerText = "Cleared";
+
   el.suggestions.style.display = "none";
+
 });
 
 </script>
