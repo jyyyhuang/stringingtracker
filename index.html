@@ -35,7 +35,6 @@ html, body {
   max-width: 520px;
   height: 100dvh;
   margin: 0 auto;
-
   display: flex;
   flex-direction: column;
 }
@@ -261,12 +260,12 @@ const el = {
 };
 
 /* =========================
-   STATE CONTROL (CRITICAL FIX)
+   STATE (CONTACTS MODE)
 ========================= */
 
-let timer = null;
-let activeRequestId = 0;
+let clientIndex = [];
 let suppressAutocomplete = false;
+let timer;
 
 /* =========================
    API
@@ -286,7 +285,49 @@ return fetch(url).then(r => r.json());
 }
 
 /* =========================
-   AUTOCOMPLETE (FIXED)
+   PRELOAD CLIENTS (ONCE)
+========================= */
+
+async function preloadClients() {
+
+const cache = localStorage.getItem("clients_cache");
+
+if (cache) {
+clientIndex = JSON.parse(cache);
+return;
+}
+
+const res = await api({
+action: "searchClients",
+query: ""
+});
+
+if (Array.isArray(res)) {
+clientIndex = res;
+localStorage.setItem("clients_cache", JSON.stringify(res));
+}
+
+}
+
+preloadClients();
+
+/* optional background refresh */
+setInterval(async () => {
+
+const res = await api({
+action: "searchClients",
+query: ""
+});
+
+if (Array.isArray(res)) {
+clientIndex = res;
+localStorage.setItem("clients_cache", JSON.stringify(res));
+}
+
+}, 60000);
+
+/* =========================
+   INSTANT SEARCH (NO API)
 ========================= */
 
 el.name.addEventListener("input", () => {
@@ -295,23 +336,19 @@ if (suppressAutocomplete) return;
 
 clearTimeout(timer);
 
-const q = el.name.value.trim();
+const q = el.name.value.trim().toLowerCase();
 
 if (!q) {
-  el.suggestions.style.display = "none";
-  return;
+el.suggestions.style.display = "none";
+return;
 }
 
-timer = setTimeout(async () => {
+/* LOCAL FILTER ONLY */
+const results = clientIndex.filter(n =>
+n.toLowerCase().includes(q)
+);
 
-const data = await api({
-  action: "searchClients",
-  query: q
-});
-
-render(data);
-
-}, 200);
+render(results.slice(0, 8));
 
 });
 
@@ -320,8 +357,8 @@ function render(list) {
 el.suggestions.innerHTML = "";
 
 if (!list?.length) {
-  el.suggestions.style.display = "none";
-  return;
+el.suggestions.style.display = "none";
+return;
 }
 
 list.forEach(n => {
@@ -339,7 +376,6 @@ el.suggestions.style.display = "none";
 
 load(n);
 
-/* release lock after UI settles */
 setTimeout(() => {
   suppressAutocomplete = false;
 }, 300);
@@ -354,7 +390,7 @@ el.suggestions.style.display = "block";
 
 }
 
-/* hide dropdown on blur */
+/* hide dropdown */
 el.name.addEventListener("blur", () => {
 setTimeout(() => {
 el.suggestions.style.display = "none";
@@ -362,56 +398,35 @@ el.suggestions.style.display = "none";
 });
 
 /* =========================
-   PREFILL (FULL FIX)
+   PREFILL
 ========================= */
 
 async function load(nameVal) {
 
-/* CRITICAL: increment request ID to prevent stale overwrite */
-const requestId = ++activeRequestId;
-
-/* ALWAYS CLEAR FIRST */
 el.club.value = "";
 el.racket.value = "";
 el.string.value = "";
 el.tension.value = "";
 el.type.value = "";
 
-el.msg.innerText = "Loading...";
-
-/* CACHE CHECK */
 const cacheKey = "history_" + nameVal;
 const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
 
-if (cached && cached.name === nameVal) {
+if (cached) {
 fill(cached);
-el.msg.innerText = "";
 return;
 }
 
-/* FETCH */
 const d = await api({
 action: "getClientHistory",
 name: nameVal
 });
 
-/* IGNORE OLD RESPONSES */
-if (requestId !== activeRequestId) return;
-
-/* VALIDATE */
 if (!d) return;
 
-/* SAVE CACHE */
-localStorage.setItem(cacheKey, JSON.stringify({
-...d,
-name: nameVal
-}));
+localStorage.setItem(cacheKey, JSON.stringify(d));
 
-/* APPLY ONLY IF STILL CURRENT */
-if (el.name.value === nameVal) {
 fill(d);
-el.msg.innerText = "";
-}
 
 }
 
