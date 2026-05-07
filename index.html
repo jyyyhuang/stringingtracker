@@ -96,7 +96,6 @@ textarea {
 .footer {
   padding: 10px;
   background: #f4f6fb;
-
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -243,7 +242,7 @@ const API_URL =
 const API_KEY = "my-secret-key";
 
 /* =========================
-   STATE
+   ELEMENTS
 ========================= */
 
 const el = {
@@ -262,10 +261,11 @@ const el = {
 };
 
 /* =========================
-   AUTOCOMPLETE FIX STATE
+   STATE CONTROL (CRITICAL FIX)
 ========================= */
 
-let timer;
+let timer = null;
+let activeRequestId = 0;
 let suppressAutocomplete = false;
 
 /* =========================
@@ -335,14 +335,14 @@ div.onclick = () => {
 suppressAutocomplete = true;
 
 el.name.value = n;
-
 el.suggestions.style.display = "none";
 
 load(n);
 
+/* release lock after UI settles */
 setTimeout(() => {
   suppressAutocomplete = false;
-}, 400);
+}, 300);
 
 };
 
@@ -354,7 +354,7 @@ el.suggestions.style.display = "block";
 
 }
 
-/* hide on blur */
+/* hide dropdown on blur */
 el.name.addEventListener("blur", () => {
 setTimeout(() => {
 el.suggestions.style.display = "none";
@@ -362,17 +362,60 @@ el.suggestions.style.display = "none";
 });
 
 /* =========================
-   PREFILL
+   PREFILL (FULL FIX)
 ========================= */
 
 async function load(nameVal) {
 
+/* CRITICAL: increment request ID to prevent stale overwrite */
+const requestId = ++activeRequestId;
+
+/* ALWAYS CLEAR FIRST */
+el.club.value = "";
+el.racket.value = "";
+el.string.value = "";
+el.tension.value = "";
+el.type.value = "";
+
+el.msg.innerText = "Loading...";
+
+/* CACHE CHECK */
+const cacheKey = "history_" + nameVal;
+const cached = JSON.parse(localStorage.getItem(cacheKey) || "null");
+
+if (cached && cached.name === nameVal) {
+fill(cached);
+el.msg.innerText = "";
+return;
+}
+
+/* FETCH */
 const d = await api({
 action: "getClientHistory",
 name: nameVal
 });
 
+/* IGNORE OLD RESPONSES */
+if (requestId !== activeRequestId) return;
+
+/* VALIDATE */
 if (!d) return;
+
+/* SAVE CACHE */
+localStorage.setItem(cacheKey, JSON.stringify({
+...d,
+name: nameVal
+}));
+
+/* APPLY ONLY IF STILL CURRENT */
+if (el.name.value === nameVal) {
+fill(d);
+el.msg.innerText = "";
+}
+
+}
+
+function fill(d) {
 
 el.club.value = d.club || "";
 el.racket.value = d.racket || "";
