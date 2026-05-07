@@ -388,7 +388,6 @@ button {
 <div class="content">
 
 <!-- NAME -->
-
 <div class="card autocomplete">
 
 <label>Name</label>
@@ -398,121 +397,84 @@ id="name"
 autocomplete="off"
 placeholder="Enter customer name">
 
-<div
-id="suggestions"
-class="suggestions">
-</div>
+<div id="suggestions" class="suggestions"></div>
 
 </div>
 
 <!-- CLUB / RACKET -->
-
 <div class="card row">
 
 <div>
 <label>Club</label>
-
-<input
-id="club"
-placeholder="Club">
+<input id="club" placeholder="Club">
 </div>
 
 <div>
 <label>Racket</label>
-
-<input
-id="racket"
-placeholder="Racket">
+<input id="racket" placeholder="Racket">
 </div>
 
 </div>
 
 <!-- STRING / TENSION -->
-
 <div class="card row">
 
 <div>
 <label>String</label>
-
-<input
-id="string"
-placeholder="String">
+<input id="string" placeholder="String">
 </div>
 
 <div>
 <label>Tension</label>
-
-<input
-id="tension"
-placeholder="Tension">
+<input id="tension" placeholder="Tension">
 </div>
 
 </div>
 
 <!-- PAID / TYPE -->
-
 <div class="card row">
 
 <div>
-
 <label>Paid</label>
-
 <select id="paid">
 <option>Yes</option>
 <option>Pending</option>
 </select>
-
 </div>
 
 <div>
-
 <label>Type</label>
-
 <select id="type">
 <option value="">—</option>
 <option value="1 String">1 String</option>
 <option value="Cross -1">Cross -1</option>
 </select>
-
 </div>
 
 </div>
 
 <!-- NOTES -->
-
 <div class="card">
 
 <label>Notes</label>
-
-<textarea
-id="notes"
-placeholder="Notes..."></textarea>
+<textarea id="notes" placeholder="Notes..."></textarea>
 
 </div>
 
 </div>
 
 <!-- FOOTER -->
-
 <div class="footer">
 
-<button
-class="submitBtn"
-type="button"
-id="submitBtn">
+<button class="submitBtn" type="button" id="submitBtn">
 Submit
 </button>
 
-<button
-class="clearBtn"
-type="button"
-id="clearBtn">
+<button class="clearBtn" type="button" id="clearBtn">
 Clear Form
 </button>
 
-<div
-class="msg"
-id="msg"></div>
+<div class="msg" id="msg"></div>
 
 </div>
 
@@ -527,107 +489,31 @@ const API_URL =
 
 const API_KEY = "my-secret-key";
 
-/* =========================
-   ELEMENTS
-========================= */
-
 const el = {
-
-  name:
-    document.getElementById("name"),
-
-  club:
-    document.getElementById("club"),
-
-  racket:
-    document.getElementById("racket"),
-
-  string:
-    document.getElementById("string"),
-
-  tension:
-    document.getElementById("tension"),
-
-  paid:
-    document.getElementById("paid"),
-
-  type:
-    document.getElementById("type"),
-
-  notes:
-    document.getElementById("notes"),
-
-  form:
-    document.getElementById("form"),
-
-  msg:
-    document.getElementById("msg"),
-
-  suggestions:
-    document.getElementById("suggestions"),
-
-  clearBtn:
-    document.getElementById("clearBtn")
+  name: document.getElementById("name"),
+  club: document.getElementById("club"),
+  racket: document.getElementById("racket"),
+  string: document.getElementById("string"),
+  tension: document.getElementById("tension"),
+  paid: document.getElementById("paid"),
+  type: document.getElementById("type"),
+  notes: document.getElementById("notes"),
+  form: document.getElementById("form"),
+  msg: document.getElementById("msg"),
+  suggestions: document.getElementById("suggestions"),
+  clearBtn: document.getElementById("clearBtn")
 };
 
-/* =========================
-   DISABLE ENTER SUBMIT
-========================= */
-
-document.addEventListener("keydown", (e) => {
-
-  if (e.key !== "Enter") return;
-
-  const tag =
-    document.activeElement.tagName.toLowerCase();
-
-  if (tag === "textarea") return;
-
-  e.preventDefault();
-  e.stopPropagation();
-
-  return false;
-
-});
-
-el.form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  return false;
-});
-
-/* =========================
-   API
-========================= */
-
+/* API */
 function api(params) {
-
-  const url =
-    API_URL + "?" +
-    new URLSearchParams({
-      key: API_KEY,
-      ...params
-    });
-
-  return fetch(url)
-    .then(r => r.json());
-
+  return fetch(API_URL + "?" + new URLSearchParams({
+    key: API_KEY,
+    ...params
+  })).then(r => r.json());
 }
 
-/* =========================
-   AUTOCOMPLETE
-========================= */
-
+/* AUTOCOMPLETE */
 let suppressAutocomplete = false;
-
-el.name.addEventListener("focus", () => {
-
-  const q = el.name.value.trim();
-
-  if (q.length >= 1) {
-    renderList(q);
-  }
-
-});
 
 el.name.addEventListener("input", () => {
 
@@ -635,44 +521,38 @@ el.name.addEventListener("input", () => {
 
   const q = el.name.value.trim();
 
-  if (q.length < 1) {
+  if (!q) {
     el.suggestions.style.display = "none";
     return;
   }
 
-  renderList(q);
+  api({ action: "searchClients", query: q })
+    .then(renderResults);
 
 });
 
-function renderList(query) {
-
-  api({
-    action: "searchClients",
-    query
-  }).then(data => {
-
-    renderResults(data);
-
-  });
-
-}
-
+/* FIX 1 ONLY */
 function renderResults(list) {
 
   el.suggestions.innerHTML = "";
 
   if (!list || !list.length) {
-
     el.suggestions.style.display = "none";
     return;
-
   }
 
-  list.slice(0, 8).forEach(n => {
+  const cleaned = list.filter(n =>
+    n && n.toLowerCase() !== "recent"
+  );
 
-    const div =
-      document.createElement("div");
+  if (!cleaned.length) {
+    el.suggestions.style.display = "none";
+    return;
+  }
 
+  cleaned.slice(0, 8).forEach(n => {
+
+    const div = document.createElement("div");
     div.textContent = n;
 
     div.onclick = () => {
@@ -680,15 +560,11 @@ function renderResults(list) {
       suppressAutocomplete = true;
 
       el.name.value = n;
-
       el.suggestions.style.display = "none";
 
       load(n);
 
-      setTimeout(() => {
-        suppressAutocomplete = false;
-      }, 200);
-
+      setTimeout(() => suppressAutocomplete = false, 200);
     };
 
     el.suggestions.appendChild(div);
@@ -696,44 +572,10 @@ function renderResults(list) {
   });
 
   el.suggestions.style.display = "block";
-
 }
 
-/* hide */
-
-el.name.addEventListener("blur", () => {
-
-  setTimeout(() => {
-    el.suggestions.style.display = "none";
-  }, 120);
-
-});
-
-/* =========================
-   PREFILL
-========================= */
-
+/* LOAD */
 async function load(nameVal) {
-
-  el.club.value = "";
-  el.racket.value = "";
-  el.string.value = "";
-  el.tension.value = "";
-  el.type.value = "";
-
-  const cached =
-    JSON.parse(
-      localStorage.getItem(
-        "history_" + nameVal
-      ) || "null"
-    );
-
-  if (cached) {
-
-    fill(cached);
-    return;
-
-  }
 
   const d = await api({
     action: "getClientHistory",
@@ -742,31 +584,23 @@ async function load(nameVal) {
 
   if (!d) return;
 
-  localStorage.setItem(
-    "history_" + nameVal,
-    JSON.stringify(d)
-  );
-
-  fill(d);
-
-}
-
-function fill(d) {
-
   el.club.value = d.club || "";
   el.racket.value = d.racket || "";
   el.string.value = d.strings || "";
   el.tension.value = d.tension || "";
   el.type.value = d.special_case || "";
-
 }
 
-/* =========================
-   SUBMIT
-========================= */
+/* FIX 2 ONLY */
+function formatDDMMYYYY(date) {
+  const dd = String(date.getDate()).padStart(2, "0");
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const yyyy = date.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
 
-document
-.getElementById("submitBtn")
+/* SUBMIT */
+document.getElementById("submitBtn")
 .addEventListener("click", async () => {
 
   el.msg.innerText = "Submitting...";
@@ -782,48 +616,31 @@ document
     tension: el.tension.value,
     paid: el.paid.value,
     special_case: el.type.value,
-    notes: el.notes.value
+    notes: el.notes.value,
 
+    handover_date: formatDDMMYYYY(new Date())
   };
 
   try {
 
     const res = await api(payload);
 
-    if (res?.error) {
-
-      el.msg.innerText = res.error;
-      return;
-
-    }
-
-    el.msg.innerText =
-      payload.client_name + " saved";
+    el.msg.innerText = payload.client_name + " saved";
 
     el.form.reset();
-
     el.suggestions.style.display = "none";
 
   } catch (err) {
-
     el.msg.innerText = "Submission failed";
-
   }
 
 });
 
-/* =========================
-   CLEAR
-========================= */
-
+/* CLEAR */
 el.clearBtn.addEventListener("click", () => {
-
   el.form.reset();
-
   el.msg.innerText = "Cleared";
-
   el.suggestions.style.display = "none";
-
 });
 
 </script>
