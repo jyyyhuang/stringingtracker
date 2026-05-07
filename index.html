@@ -18,7 +18,7 @@ viewport-fit=cover">
 <style>
 
 /* =========================
-   BACKGROUND FIX
+   BACKGROUND FIX (GITHUB PAGES)
 ========================= */
 
 html, body {
@@ -28,11 +28,11 @@ html, body {
   overflow: hidden;
   font-family: "Open Sans", sans-serif;
 
-  /* 👇 YOUR IMAGE BACKGROUND */
-  background: url("/mnt/data/image.png") center center / cover no-repeat fixed;
+  /* ✅ FIX: correct GitHub Pages relative path */
+  background: url("assets/background.jpg") center center / cover no-repeat fixed;
 }
 
-/* 👇 READABILITY OVERLAY */
+/* READABILITY OVERLAY */
 body::before {
   content: "";
   position: fixed;
@@ -299,7 +299,7 @@ const el = {
 };
 
 /* =========================
-   ENTER BLOCK (SAFE)
+   ENTER BLOCK
 ========================= */
 
 document.addEventListener("keydown", (e) => {
@@ -307,7 +307,6 @@ document.addEventListener("keydown", (e) => {
     const tag = document.activeElement.tagName.toLowerCase();
     if (tag === "textarea") return;
     e.preventDefault();
-    e.stopPropagation();
     return false;
   }
 });
@@ -348,13 +347,10 @@ function updateRecents(name) {
 }
 
 /* =========================
-   AUTOCOMPLETE (unchanged)
+   AUTOCOMPLETE
 ========================= */
 
-let suppressAutocomplete = false;
-
 el.name.addEventListener("input", () => {
-  if (suppressAutocomplete) return;
 
   let q = el.name.value.trim();
 
@@ -448,7 +444,7 @@ document.getElementById("submitBtn").addEventListener("click", async () => {
     notes: el.notes.value
   };
 
-  const res = await api(payload);
+  await api(payload);
 
   el.msg.innerText = payload.client_name + " saved";
 
