@@ -506,7 +506,7 @@ function api(params) {
 }
 
 /* =========================
-   AUTOCOMPLETE (unchanged logic)
+   AUTOCOMPLETE
 ========================= */
 
 let debounceTimer = null;
@@ -534,6 +534,7 @@ el.name.addEventListener("input", () => {
       .then(data => {
 
         if (requestId !== latestRequestId) return;
+        if (suppressAutocomplete) return;
 
         renderResults(data);
 
@@ -581,7 +582,7 @@ function renderResults(list) {
   });
 
   el.suggestions.style.display = "block";
-});
+}
 
 /* LOAD */
 
@@ -599,7 +600,6 @@ async function load(nameVal) {
   el.string.value = d.strings || "";
   el.tension.value = d.tension || "";
 
-  /* FIX: robust type mapping */
   const v = (d.special_case || "").trim();
 
   if (["1 String", "Cross -1"].includes(v)) {
@@ -608,15 +608,6 @@ async function load(nameVal) {
     el.type.value = "";
   }
 
-}
-
-/* DATE FIX */
-
-function formatDDMMYYYY(date) {
-  const dd = String(date.getDate()).padStart(2, "0");
-  const mm = String(date.getMonth() + 1).padStart(2, "0");
-  const yyyy = date.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
 }
 
 /* SUBMIT */
@@ -637,9 +628,7 @@ document.getElementById("submitBtn")
     tension: el.tension.value,
     paid: el.paid.value,
     special_case: el.type.value,
-    notes: el.notes.value,
-
-    handover_date: formatDDMMYYYY(new Date())
+    notes: el.notes.value
 
   };
 
