@@ -18,245 +18,209 @@ viewport-fit=cover">
 <style>
 
 html, body {
+  margin: 0;
+  padding: 0;
 
-margin: 0;
-padding: 0;
+  width: 100%;
+  height: 100%;
 
-width: 100%;
-height: 100%;
+  background: #f4f6fb;
 
-overflow: hidden;
+  font-family: "Open Sans", sans-serif;
 
-background: #f4f6fb;
+  overflow: hidden;
 
-font-family: "Open Sans", sans-serif;
-
--webkit-text-size-adjust: 100%;
-
+  -webkit-text-size-adjust: 100%;
 }
 
 * {
-box-sizing: border-box;
--webkit-tap-highlight-color: transparent;
-}
-
-body {
-display: flex;
-justify-content: center;
-align-items: center;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .app {
 
-width: 100%;
-max-width: 430px;
+  width: 100%;
+  max-width: 460px;
 
-height: 100vh;
+  height: 100dvh;
 
-display: flex;
-flex-direction: column;
+  margin: 0 auto;
 
-overflow: hidden;
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
 }
 
 .header {
 
-flex-shrink: 0;
+  flex-shrink: 0;
 
-text-align: center;
+  text-align: center;
 
-font-size: 24px;
-font-weight: 800;
+  font-size: 22px;
+  font-weight: 800;
 
-padding: 10px 8px 6px;
+  padding: 10px;
 
 }
 
 .content {
 
-flex: 1;
+  flex: 1;
 
-overflow-y: auto;
+  overflow-y: auto;
 
-padding: 8px;
+  padding: 8px;
 
-display: flex;
-flex-direction: column;
+  display: flex;
+  flex-direction: column;
 
-gap: 8px;
+  gap: 8px;
+
+  min-height: 0;
 }
 
 .card {
 
-background: white;
+  background: white;
 
-border-radius: 14px;
+  border-radius: 14px;
 
-padding: 10px;
+  padding: 10px;
 
-box-shadow:
-0 4px 12px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 
 }
 
 .row {
-
-display: flex;
-gap: 8px;
-
+  display: flex;
+  gap: 8px;
 }
 
 .row > div {
-flex: 1;
+  flex: 1;
 }
 
 label {
 
-display: block;
+  display: block;
 
-font-size: 12px;
-font-weight: 700;
+  font-size: 12px;
+  font-weight: 700;
 
-margin-bottom: 4px;
+  margin-bottom: 4px;
 
 }
 
-input,
-select,
-textarea {
+input, select, textarea {
 
-width: 100%;
+  width: 100%;
 
-padding: 10px 12px;
+  padding: 10px;
 
-font-size: 16px !important;
+  font-size: 16px !important;
 
-border-radius: 10px;
+  border-radius: 10px;
 
-border: 1px solid #ddd;
+  border: 1px solid #ddd;
 
-outline: none;
+  outline: none;
 
-background: white;
-
-font-family: "Open Sans", sans-serif;
+  background: white;
 
 }
 
 textarea {
-
-min-height: 55px;
-resize: none;
-
+  min-height: 60px;
+  resize: none;
 }
 
+/* FOOTER ALWAYS VISIBLE */
 .footer {
 
-flex-shrink: 0;
+  flex-shrink: 0;
 
-padding: 8px;
+  padding: 8px;
 
-background: #f4f6fb;
+  background: #f4f6fb;
 
-position: relative;
+  position: sticky;
 
-z-index: 50;
+  bottom: 0;
+
+  z-index: 999;
 
 }
 
 button {
 
-width: 100%;
+  width: 100%;
 
-border: none;
+  border: none;
 
-border-radius: 14px;
+  border-radius: 14px;
 
-padding: 14px;
+  padding: 14px;
 
-font-size: 18px;
-font-weight: 800;
+  font-size: 18px;
+  font-weight: 800;
 
-background:
-linear-gradient(
-135deg,
-#7aa7ff,
-#b7a6ff
-);
+  background: linear-gradient(135deg,#7aa7ff,#b7a6ff);
 
-color: white;
-
-cursor: pointer;
-
-position: relative;
-
-z-index: 9999;
+  color: white;
 
 }
 
+/* MESSAGE */
 .msg {
-
-margin-top: 5px;
-
-font-size: 12px;
-
-text-align: center;
-
-color: green;
-
+  text-align: center;
+  font-size: 12px;
+  margin-top: 6px;
+  color: green;
 }
 
 /* AUTOCOMPLETE */
-
 .autocomplete {
-position: relative;
+  position: relative;
 }
 
 .suggestions {
 
-position: absolute;
+  position: absolute;
 
-top: calc(100% + 2px);
+  top: 100%;
+  left: 0;
+  right: 0;
 
-left: 0;
-right: 0;
+  background: white;
 
-background: white;
+  border-radius: 10px;
 
-border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.12);
 
-box-shadow:
-0 4px 16px rgba(0,0,0,0.12);
+  max-height: 180px;
 
-overflow: hidden;
+  overflow-y: auto;
 
-display: none;
+  display: none;
 
-z-index: 999;
-
-max-height: 180px;
-
-overflow-y: auto;
+  z-index: 1000;
 }
 
 .suggestions div {
 
-padding: 10px 12px;
+  padding: 10px;
 
-border-bottom:
-1px solid #eee;
+  border-bottom: 1px solid #eee;
 
-font-size: 14px;
+  font-size: 14px;
 
-background: white;
-
-}
-
-.suggestions div:last-child {
-border-bottom: none;
 }
 
 </style>
+
 </head>
 
 <body>
@@ -272,25 +236,17 @@ border-bottom: none;
 <div class="content">
 
 <!-- NAME -->
-
 <div class="card autocomplete">
 
 <label>Name</label>
 
-<input
-id="name"
-name="client_name"
-autocomplete="off">
+<input id="name" name="client_name" autocomplete="off">
 
-<div
-id="suggestions"
-class="suggestions">
-</div>
+<div id="suggestions" class="suggestions"></div>
 
 </div>
 
-<!-- CLUB + RACKET -->
-
+<!-- CLUB / RACKET -->
 <div class="card row">
 
 <div>
@@ -305,8 +261,7 @@ class="suggestions">
 
 </div>
 
-<!-- STRING + TENSION -->
-
+<!-- STRING / TENSION -->
 <div class="card row">
 
 <div>
@@ -321,56 +276,42 @@ class="suggestions">
 
 </div>
 
-<!-- PAID + TYPE -->
-
+<!-- PAID / TYPE -->
 <div class="card row">
 
 <div>
-
 <label>Paid</label>
-
 <select name="paid">
-<option value="Yes">Yes</option>
-<option value="Pending">Pending</option>
+<option>Yes</option>
+<option>Pending</option>
 </select>
-
 </div>
 
 <div>
-
 <label>Type</label>
-
 <select name="special_case">
 <option value="">—</option>
-<option value="1 String">
-1 String
-</option>
-<option value="Cross -1">
-Cross -1
-</option>
+<option value="1 String">1 String</option>
+<option value="Cross -1">Cross -1</option>
 </select>
-
 </div>
 
 </div>
 
 <!-- NOTES -->
-
 <div class="card">
 
 <label>Notes</label>
-
 <textarea name="notes"></textarea>
 
 </div>
 
 </div>
 
+<!-- FOOTER -->
 <div class="footer">
 
-<button type="submit">
-Submit
-</button>
+<button type="submit">Submit</button>
 
 <div id="msg" class="msg"></div>
 
@@ -389,10 +330,10 @@ const API_KEY =
 "my-secret-key";
 
 /* =========================
-   AUTOCOMPLETE
+   AUTOCOMPLETE (DEBOUNCED)
 ========================= */
 
-let timer = null;
+let timer;
 
 const nameInput =
 document.getElementById("name");
@@ -400,207 +341,157 @@ document.getElementById("name");
 const suggestions =
 document.getElementById("suggestions");
 
-nameInput.addEventListener(
-"input",
-function () {
+nameInput.addEventListener("input", () => {
 
 clearTimeout(timer);
 
-const q =
-this.value.trim();
+const q = nameInput.value.trim();
 
 if (!q) {
-
-suggestions.style.display =
-"none";
-
-return;
+  suggestions.style.display = "none";
+  return;
 }
 
-timer =
-setTimeout(async () => {
+timer = setTimeout(async () => {
 
 try {
 
-const res =
-await fetch(API_URL, {
-
+const res = await fetch(API_URL, {
 method: "POST",
-
-headers: {
-"Content-Type":
-"application/json"
-},
-
+headers: {"Content-Type":"application/json"},
 body: JSON.stringify({
 key: API_KEY,
 action: "searchClients",
 query: q
 })
-
 });
 
-const data =
-await res.json();
+const data = await res.json();
 
-renderSuggestions(data);
+render(data);
 
 } catch(err) {
-console.log(err);
+console.log("autocomplete error", err);
 }
 
-}, 350);
+}, 300);
 
 });
 
-function renderSuggestions(list) {
+function render(list) {
 
 suggestions.innerHTML = "";
 
-if (!list || !list.length) {
-
-suggestions.style.display =
-"none";
-
+if (!list?.length) {
+suggestions.style.display = "none";
 return;
 }
 
-list.forEach(name => {
+list.forEach(n => {
 
-const div =
-document.createElement("div");
+const div = document.createElement("div");
 
-div.textContent = name;
+div.textContent = n;
 
 div.onclick = () => {
-
-nameInput.value = name;
-
-suggestions.style.display =
-"none";
-
-loadClient(name);
-
+nameInput.value = n;
+suggestions.style.display = "none";
+load(n);
 };
 
 suggestions.appendChild(div);
 
 });
 
-suggestions.style.display =
-"block";
+suggestions.style.display = "block";
 }
 
 /* =========================
-   LOAD CLIENT
+   PREFILL
 ========================= */
 
-async function loadClient(name) {
+async function load(name) {
 
 try {
 
-const res =
-await fetch(API_URL, {
-
+const res = await fetch(API_URL, {
 method: "POST",
-
-headers: {
-"Content-Type":
-"application/json"
-},
-
+headers: {"Content-Type":"application/json"},
 body: JSON.stringify({
 key: API_KEY,
 action: "getClientHistory",
 name
 })
-
 });
 
-const d =
-await res.json();
+const d = await res.json();
 
 if (!d) return;
 
-club.value =
-d.club || "";
+club.value = d.club || "";
+racket.value = d.racket || "";
+strings.value = d.strings || "";
+tension.value = d.tension || "";
 
-racket.value =
-d.racket || "";
-
-strings.value =
-d.strings || "";
-
-tension.value =
-d.tension || "";
-
-document.querySelector(
-'[name="special_case"]'
-).value =
+document.querySelector('[name="special_case"]').value =
 d.special_case || "";
 
 } catch(err) {
-console.log(err);
+console.log("prefill error", err);
 }
 
 }
 
 /* =========================
-   SUBMIT
+   SUBMIT (DEBUG SAFE)
 ========================= */
 
-document
-.getElementById("form")
-.addEventListener(
-"submit",
-async function(e){
+document.getElementById("form")
+.addEventListener("submit", async (e) => {
 
 e.preventDefault();
 
+msg.innerText = "Submitting...";
+
 try {
 
-const data =
-Object.fromEntries(
-new FormData(this).entries()
+const data = Object.fromEntries(
+new FormData(e.target).entries()
 );
 
 data.key = API_KEY;
 data.action = "submit";
 
-const res =
-await fetch(API_URL, {
-
+const res = await fetch(API_URL, {
 method: "POST",
-
-headers: {
-"Content-Type":
-"application/json"
-},
-
+headers: {"Content-Type":"application/json"},
 body: JSON.stringify(data)
-
 });
 
-const result =
-await res.json();
+const text = await res.text();
 
-console.log(result);
+console.log("RAW:", text);
+
+const json = JSON.parse(text);
+
+if (json.error) {
+msg.innerText = json.error;
+return;
+}
 
 msg.innerText =
-data.client_name +
-" saved";
+data.client_name + " saved";
 
-this.reset();
+e.target.reset();
 
-suggestions.style.display =
-"none";
+suggestions.style.display = "none";
 
 } catch(err) {
 
 console.log(err);
 
 msg.innerText =
-"Connection failed";
+"Connection failed: " + err.message;
 
 }
 
