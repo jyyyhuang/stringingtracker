@@ -391,7 +391,10 @@ button {
 
 <label>Name</label>
 
-<input id="name" autocomplete="off" placeholder="Enter customer name">
+<input
+id="name"
+autocomplete="off"
+placeholder="Enter customer name">
 
 <div id="suggestions" class="suggestions"></div>
 
@@ -457,8 +460,13 @@ button {
 
 <div class="footer">
 
-<button class="submitBtn" type="button" id="submitBtn">Submit</button>
-<button class="clearBtn" type="button" id="clearBtn">Clear Form</button>
+<button class="submitBtn" type="button" id="submitBtn">
+Submit
+</button>
+
+<button class="clearBtn" type="button" id="clearBtn">
+Clear Form
+</button>
 
 <div class="msg" id="msg"></div>
 
@@ -498,16 +506,12 @@ function api(params) {
 }
 
 /* =========================
-   DEBOUNCE + RACE CONTROL
+   AUTOCOMPLETE (unchanged logic)
 ========================= */
 
 let debounceTimer = null;
 let latestRequestId = 0;
 let suppressAutocomplete = false;
-
-/* =========================
-   SEARCH (DEBOUNCED)
-========================= */
 
 el.name.addEventListener("input", () => {
 
@@ -539,9 +543,7 @@ el.name.addEventListener("input", () => {
 
 });
 
-/* =========================
-   RENDER
-========================= */
+/* FIXED ONLY: filter + type load fix stays safe */
 
 function renderResults(list) {
 
@@ -572,7 +574,6 @@ function renderResults(list) {
       load(n);
 
       setTimeout(() => suppressAutocomplete = false, 200);
-
     };
 
     el.suggestions.appendChild(div);
@@ -580,11 +581,9 @@ function renderResults(list) {
   });
 
   el.suggestions.style.display = "block";
-}
+});
 
-/* =========================
-   LOAD
-========================= */
+/* LOAD */
 
 async function load(nameVal) {
 
@@ -599,11 +598,19 @@ async function load(nameVal) {
   el.racket.value = d.racket || "";
   el.string.value = d.strings || "";
   el.tension.value = d.tension || "";
+
+  /* FIX: robust type mapping */
+  const v = (d.special_case || "").trim();
+
+  if (["1 String", "Cross -1"].includes(v)) {
+    el.type.value = v;
+  } else {
+    el.type.value = "";
+  }
+
 }
 
-/* =========================
-   DATE FORMAT FIX
-========================= */
+/* DATE FIX */
 
 function formatDDMMYYYY(date) {
   const dd = String(date.getDate()).padStart(2, "0");
@@ -612,9 +619,7 @@ function formatDDMMYYYY(date) {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-/* =========================
-   SUBMIT
-========================= */
+/* SUBMIT */
 
 document.getElementById("submitBtn")
 .addEventListener("click", async () => {
@@ -655,9 +660,7 @@ document.getElementById("submitBtn")
 
 });
 
-/* =========================
-   CLEAR
-========================= */
+/* CLEAR */
 
 el.clearBtn.addEventListener("click", () => {
 
