@@ -1,291 +1,309 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="UTF-8">
 
-  <!-- iPhone safe -->
-  <meta name="viewport"
-        content="width=device-width,
-                 initial-scale=1,
-                 maximum-scale=1,
-                 user-scalable=no,
-                 viewport-fit=cover">
+<meta charset="UTF-8">
 
-  <title>🏸 Stringing Tracker</title>
+<meta name="viewport"
+content="width=device-width,
+initial-scale=1,
+maximum-scale=1,
+user-scalable=no,
+viewport-fit=cover">
 
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+<title>🏸 Stringing Tracker 🏸</title>
 
-  <style>
-    html, body {
-      margin: 0;
-      padding: 0;
+<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-      width: 100%;
-      height: 100%;
+<style>
 
-      overflow: hidden;
+html, body {
+  margin: 0;
+  padding: 0;
 
-      font-family: "Open Sans", sans-serif;
+  width: 100%;
+  min-height: 100%;
 
-      background: #f4f6fb;
-    }
+  overflow-x: hidden;
+  overflow-y: auto;
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
+  background: #f4f6fb;
 
-    .app {
-      width: 100vw;
-      height: 100vh;
+  font-family: "Open Sans", sans-serif;
 
-      display: flex;
-      flex-direction: column;
-    }
+  -webkit-text-size-adjust: 100%;
+}
 
-    .header {
-      text-align: center;
-      font-size: 34px;
-      font-weight: 800;
-      padding: 18px 12px 8px;
-    }
+* {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
 
-    .content {
-      flex: 1;
-      overflow-y: auto;
+.app {
+  width: 100%;
+  min-height: 100vh;
 
-      padding: 12px;
+  display: flex;
+  flex-direction: column;
+}
 
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
+.header {
+  text-align: center;
 
-    .card {
-      background: white;
+  font-size: 34px;
+  font-weight: 800;
 
-      border-radius: 18px;
+  padding: 18px 12px 8px;
+}
 
-      padding: 14px;
+.content {
+  flex: 1;
 
-      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-    }
+  overflow-y: auto;
 
-    .row {
-      display: flex;
-      gap: 12px;
-    }
+  padding: 12px;
 
-    .row > div {
-      flex: 1;
-    }
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
 
-    label {
-      display: block;
+.card {
+  background: white;
 
-      font-size: 15px;
-      font-weight: 700;
+  border-radius: 18px;
 
-      margin-bottom: 6px;
-    }
+  padding: 14px;
 
-    input, select, textarea {
-      width: 100%;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
 
-      padding: 14px;
+.row {
+  display: flex;
+  gap: 12px;
+}
 
-      font-size: 16px !important;
+.row > div {
+  flex: 1;
+}
 
-      border-radius: 12px;
+label {
+  display: block;
 
-      border: 1px solid #ddd;
+  font-size: 15px;
+  font-weight: 700;
 
-      font-family: "Open Sans", sans-serif;
+  margin-bottom: 6px;
+}
 
-      outline: none;
+input, select, textarea {
 
-      background: white;
-    }
+  width: 100%;
 
-    textarea {
-      min-height: 90px;
-      resize: none;
-    }
+  padding: 14px;
 
-    button {
-      width: 100%;
+  font-size: 16px !important;
 
-      border: none;
+  border-radius: 12px;
 
-      border-radius: 16px;
+  border: 1px solid #ddd;
 
-      padding: 18px;
+  outline: none;
 
-      font-size: 18px;
-      font-weight: 800;
+  font-family: "Open Sans", sans-serif;
 
-      background: linear-gradient(135deg, #7aa7ff, #b7a6ff);
+  background: white;
+}
 
-      color: white;
-    }
+textarea {
+  min-height: 90px;
+  resize: none;
+}
 
-    .footer {
-      padding: 12px;
-    }
+.footer {
+  padding: 12px;
+}
 
-    .msg {
-      margin-top: 8px;
-      text-align: center;
-      font-size: 13px;
-      color: green;
-    }
+button {
 
-    /* autocomplete */
+  width: 100%;
 
-    .autocomplete {
-      position: relative;
-    }
+  border: none;
 
-    .suggestions {
-      position: absolute;
-      top: calc(100% + 4px);
+  border-radius: 16px;
 
-      left: 0;
-      right: 0;
+  padding: 18px;
 
-      background: white;
+  font-size: 18px;
+  font-weight: 800;
 
-      border-radius: 12px;
+  background: linear-gradient(
+    135deg,
+    #7aa7ff,
+    #b7a6ff
+  );
 
-      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+  color: white;
+}
 
-      overflow: hidden;
+.msg {
+  margin-top: 8px;
 
-      display: none;
+  text-align: center;
 
-      z-index: 999;
-    }
+  font-size: 13px;
 
-    .suggestions div {
-      padding: 12px;
-      border-bottom: 1px solid #eee;
-    }
+  color: green;
+}
 
-    .suggestions div:last-child {
-      border-bottom: none;
-    }
-  </style>
+/* AUTOCOMPLETE */
+
+.autocomplete {
+  position: relative;
+}
+
+.suggestions {
+
+  position: absolute;
+
+  top: calc(100% + 4px);
+
+  left: 0;
+  right: 0;
+
+  background: white;
+
+  border-radius: 12px;
+
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+
+  overflow: hidden;
+
+  display: none;
+
+  z-index: 999;
+}
+
+.suggestions div {
+  padding: 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.suggestions div:last-child {
+  border-bottom: none;
+}
+
+</style>
 </head>
 
 <body>
 
 <div class="app">
 
-  <div class="header">
-    🏸 Stringing Tracker 🏸
-  </div>
+<div class="header">
+🏸 Stringing Tracker 🏸
+</div>
 
-  <form id="form" class="app">
+<form id="form" class="app">
 
-    <div class="content">
+<div class="content">
 
-      <!-- NAME -->
-      <div class="card autocomplete">
+<div class="card autocomplete">
 
-        <label>Name</label>
+<label>Name</label>
 
-        <input id="name"
-               name="client_name"
-               autocomplete="off">
+<input
+id="name"
+name="client_name"
+autocomplete="off">
 
-        <div id="suggestions"
-             class="suggestions"></div>
+<div
+id="suggestions"
+class="suggestions">
+</div>
 
-      </div>
+</div>
 
-      <!-- CLUB / RACKET -->
-      <div class="card row">
+<div class="card row">
 
-        <div>
-          <label>Club</label>
-          <input id="club" name="club">
-        </div>
+<div>
+<label>Club</label>
+<input id="club" name="club">
+</div>
 
-        <div>
-          <label>Racket</label>
-          <input id="racket" name="racquet_name">
-        </div>
+<div>
+<label>Racket</label>
+<input id="racket" name="racquet_name">
+</div>
 
-      </div>
+</div>
 
-      <!-- STRING / TENSION -->
-      <div class="card row">
+<div class="card row">
 
-        <div>
-          <label>String</label>
-          <input id="strings" name="strings">
-        </div>
+<div>
+<label>String</label>
+<input id="strings" name="strings">
+</div>
 
-        <div>
-          <label>Tension</label>
-          <input id="tension" name="tension">
-        </div>
+<div>
+<label>Tension</label>
+<input id="tension" name="tension">
+</div>
 
-      </div>
+</div>
 
-      <!-- PAID / TYPE -->
-      <div class="card row">
+<div class="card row">
 
-        <div>
-          <label>Paid</label>
+<div>
 
-          <select name="paid">
-            <option value="Yes">Yes</option>
-            <option value="Pending">Pending</option>
-          </select>
-        </div>
+<label>Paid</label>
 
-        <div>
-          <label>Type</label>
+<select name="paid">
+<option value="Yes">Yes</option>
+<option value="Pending">Pending</option>
+</select>
 
-          <select name="special_case">
-            <option value="">—</option>
-            <option value="1 String">1 String</option>
-            <option value="Cross -1">Cross -1</option>
-          </select>
-        </div>
+</div>
 
-      </div>
+<div>
 
-      <!-- NOTES -->
-      <div class="card">
+<label>Type</label>
 
-        <label>Notes</label>
+<select name="special_case">
+<option value="">—</option>
+<option value="1 String">1 String</option>
+<option value="Cross -1">Cross -1</option>
+</select>
 
-        <textarea name="notes"></textarea>
+</div>
 
-      </div>
+</div>
 
-    </div>
+<div class="card">
 
-    <div class="footer">
+<label>Notes</label>
 
-      <button type="submit">
-        Submit
-      </button>
+<textarea name="notes"></textarea>
 
-      <div id="msg" class="msg"></div>
+</div>
 
-    </div>
+</div>
 
-  </form>
+<div class="footer">
+
+<button type="submit">
+Submit
+</button>
+
+<div id="msg" class="msg"></div>
+
+</div>
+
+</form>
 
 </div>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
 
 const API_URL =
 "https://script.google.com/macros/s/AKfycbx6cJSMpg10QLMqotk2Gm2xSf5TO9ZjxT1QxHIM_CrY7xdJbrRgL9sdzjKoNg3PHwT6SQ/exec";
@@ -305,71 +323,87 @@ document.getElementById("name");
 const suggestions =
 document.getElementById("suggestions");
 
-nameInput.addEventListener("input", function () {
+nameInput.addEventListener(
+"input",
+function () {
 
-  clearTimeout(timer);
+clearTimeout(timer);
 
-  const q = this.value.trim();
+const q =
+this.value.trim();
 
-  if (!q) {
-    suggestions.style.display = "none";
-    return;
-  }
+if (!q) {
+  suggestions.style.display =
+  "none";
+  return;
+}
 
-  timer = setTimeout(async () => {
+timer =
+setTimeout(async () => {
 
-    const res = await fetch(API_URL, {
-      method: "POST",
+const res =
+await fetch(API_URL, {
 
-      headers: {
-        "Content-Type": "application/json"
-      },
+method: "POST",
 
-      body: JSON.stringify({
-        key: API_KEY,
-        action: "searchClients",
-        query: q
-      })
-    });
+headers: {
+"Content-Type":
+"application/json"
+},
 
-    const data = await res.json();
+body: JSON.stringify({
+key: API_KEY,
+action: "searchClients",
+query: q
+})
 
-    renderSuggestions(data);
+});
 
-  }, 300);
+const data =
+await res.json();
+
+renderSuggestions(data);
+
+}, 300);
 
 });
 
 function renderSuggestions(list) {
 
-  suggestions.innerHTML = "";
+suggestions.innerHTML = "";
 
-  if (!list || !list.length) {
-    suggestions.style.display = "none";
-    return;
-  }
+if (!list || !list.length) {
 
-  list.forEach(name => {
+suggestions.style.display =
+"none";
 
-    const div =
-    document.createElement("div");
+return;
+}
 
-    div.textContent = name;
+list.forEach(name => {
 
-    div.onclick = () => {
+const div =
+document.createElement("div");
 
-      nameInput.value = name;
+div.textContent = name;
 
-      suggestions.style.display = "none";
+div.onclick = () => {
 
-      loadClient(name);
-    };
+nameInput.value = name;
 
-    suggestions.appendChild(div);
+suggestions.style.display =
+"none";
 
-  });
+loadClient(name);
 
-  suggestions.style.display = "block";
+};
+
+suggestions.appendChild(div);
+
+});
+
+suggestions.style.display =
+"block";
 }
 
 /* =========================
@@ -378,69 +412,91 @@ function renderSuggestions(list) {
 
 async function loadClient(name) {
 
-  const res = await fetch(API_URL, {
-    method: "POST",
+const res =
+await fetch(API_URL, {
 
-    headers: {
-      "Content-Type": "application/json"
-    },
+method: "POST",
 
-    body: JSON.stringify({
-      key: API_KEY,
-      action: "getClientHistory",
-      name
-    })
-  });
+headers: {
+"Content-Type":
+"application/json"
+},
 
-  const d = await res.json();
+body: JSON.stringify({
+key: API_KEY,
+action: "getClientHistory",
+name
+})
 
-  if (!d) return;
+});
 
-  club.value = d.club || "";
-  racket.value = d.racket || "";
-  strings.value = d.strings || "";
-  tension.value = d.tension || "";
+const d =
+await res.json();
 
-  document.querySelector(
-    '[name="special_case"]'
-  ).value = d.special_case || "";
+if (!d) return;
+
+club.value =
+d.club || "";
+
+racket.value =
+d.racket || "";
+
+strings.value =
+d.strings || "";
+
+tension.value =
+d.tension || "";
+
+document.querySelector(
+'[name="special_case"]'
+).value =
+d.special_case || "";
 }
 
 /* =========================
    SUBMIT
 ========================= */
 
-document.getElementById("form")
-.addEventListener("submit",
+document
+.getElementById("form")
+.addEventListener(
+"submit",
 async function(e){
 
-  e.preventDefault();
+e.preventDefault();
 
-  const data =
-  Object.fromEntries(
-    new FormData(this).entries()
-  );
+const data =
+Object.fromEntries(
+new FormData(this).entries()
+);
 
-  data.key = API_KEY;
-  data.action = "submit";
+data.key = API_KEY;
+data.action = "submit";
 
-  const res = await fetch(API_URL, {
-    method: "POST",
+const res =
+await fetch(API_URL, {
 
-    headers: {
-      "Content-Type": "application/json"
-    },
+method: "POST",
 
-    body: JSON.stringify(data)
-  });
+headers: {
+"Content-Type":
+"application/json"
+},
 
-  await res.json();
+body: JSON.stringify(data)
 
-  msg.innerText =
-    data.client_name + " saved";
-
-  this.reset();
 });
+
+await res.json();
+
+msg.innerText =
+data.client_name +
+" saved";
+
+this.reset();
+
+});
+
 </script>
 
 </body>
