@@ -304,8 +304,6 @@ button {
   overflow: visible !important;
 }
 
-/* FIXED POSITIONING */
-
 .suggestions {
 
   position: absolute;
@@ -350,6 +348,8 @@ button {
   color: #111827;
 
   background: white;
+
+  cursor: pointer;
 }
 
 .suggestions div:hover {
@@ -358,24 +358,6 @@ button {
 
 .suggestions div:last-child {
   border-bottom: none;
-}
-
-.section-title {
-
-  font-size: 11px;
-
-  color: #6b7280;
-
-  padding: 8px 14px;
-
-  background: #f8fafc;
-
-  font-weight: 800;
-
-  letter-spacing: 0.4px;
-
-  position: sticky;
-  top: 0;
 }
 
 /* =========================
@@ -405,7 +387,7 @@ button {
 
 <div class="content">
 
-<!-- NAME CARD -->
+<!-- NAME -->
 
 <div class="card autocomplete">
 
@@ -423,7 +405,7 @@ class="suggestions">
 
 </div>
 
-<!-- CLUB + RACKET -->
+<!-- CLUB / RACKET -->
 
 <div class="card row">
 
@@ -445,7 +427,7 @@ placeholder="Racket">
 
 </div>
 
-<!-- STRING + TENSION -->
+<!-- STRING / TENSION -->
 
 <div class="card row">
 
@@ -467,7 +449,7 @@ placeholder="Tension">
 
 </div>
 
-<!-- PAID + TYPE -->
+<!-- PAID / TYPE -->
 
 <div class="card row">
 
@@ -632,112 +614,59 @@ function api(params) {
 }
 
 /* =========================
-   RECENTS
-========================= */
-
-let recentCustomers =
-JSON.parse(
-  localStorage.getItem("recent_customers") || "[]"
-);
-
-function updateRecents(name) {
-
-  if (!name) return;
-
-  recentCustomers =
-    recentCustomers.filter(n => n !== name);
-
-  recentCustomers.unshift(name);
-
-  recentCustomers =
-    recentCustomers.slice(0, 8);
-
-  localStorage.setItem(
-    "recent_customers",
-    JSON.stringify(recentCustomers)
-  );
-
-}
-
-/* =========================
    AUTOCOMPLETE
 ========================= */
 
 let suppressAutocomplete = false;
 
 el.name.addEventListener("focus", () => {
-  renderList(el.name.value.trim());
+
+  const q = el.name.value.trim();
+
+  if (q.length >= 1) {
+    renderList(q);
+  }
+
 });
 
 el.name.addEventListener("input", () => {
 
   if (suppressAutocomplete) return;
 
-  renderList(
-    el.name.value.trim()
-  );
+  const q = el.name.value.trim();
+
+  if (q.length < 1) {
+    el.suggestions.style.display = "none";
+    return;
+  }
+
+  renderList(q);
 
 });
 
 function renderList(query) {
 
-  el.suggestions.innerHTML = "";
+  api({
+    action: "searchClients",
+    query
+  }).then(data => {
 
-  let results = [];
+    renderResults(data);
 
-  if (!query) {
-
-    results = recentCustomers;
-
-  } else {
-
-    results =
-      recentCustomers.filter(n =>
-        n.toLowerCase()
-         .includes(query.toLowerCase())
-      );
-
-  }
-
-  if (results.length === 0 && query) {
-
-    api({
-      action: "searchClients",
-      query
-    }).then(data => {
-      renderAPI(data);
-    });
-
-    return;
-  }
-
-  renderLocal(results);
+  });
 
 }
 
-function renderLocal(list) {
-  renderListUI(list, true);
-}
-
-function renderAPI(list) {
-  renderListUI(list, false);
-}
-
-function renderListUI(list, isLocal) {
+function renderResults(list) {
 
   el.suggestions.innerHTML = "";
 
-  if (!list?.length) {
+  if (!list || !list.length) {
 
     el.suggestions.style.display = "none";
     return;
 
   }
-
-  el.suggestions.innerHTML =
-    "<div class='section-title'>" +
-    (isLocal ? "Recent" : "Search Results") +
-    "</div>";
 
   list.slice(0, 8).forEach(n => {
 
@@ -756,8 +685,6 @@ function renderListUI(list, isLocal) {
 
       load(n);
 
-      updateRecents(n);
-
       setTimeout(() => {
         suppressAutocomplete = false;
       }, 200);
@@ -771,6 +698,8 @@ function renderListUI(list, isLocal) {
   el.suggestions.style.display = "block";
 
 }
+
+/* hide */
 
 el.name.addEventListener("blur", () => {
 
@@ -870,8 +799,6 @@ document
 
     el.msg.innerText =
       payload.client_name + " saved";
-
-    updateRecents(payload.client_name);
 
     el.form.reset();
 
