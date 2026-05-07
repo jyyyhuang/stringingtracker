@@ -387,21 +387,16 @@ button {
 
 <div class="content">
 
-<!-- NAME -->
 <div class="card autocomplete">
 
 <label>Name</label>
 
-<input
-id="name"
-autocomplete="off"
-placeholder="Enter customer name">
+<input id="name" autocomplete="off" placeholder="Enter customer name">
 
 <div id="suggestions" class="suggestions"></div>
 
 </div>
 
-<!-- CLUB / RACKET -->
 <div class="card row">
 
 <div>
@@ -416,7 +411,6 @@ placeholder="Enter customer name">
 
 </div>
 
-<!-- STRING / TENSION -->
 <div class="card row">
 
 <div>
@@ -431,7 +425,6 @@ placeholder="Enter customer name">
 
 </div>
 
-<!-- PAID / TYPE -->
 <div class="card row">
 
 <div>
@@ -453,7 +446,6 @@ placeholder="Enter customer name">
 
 </div>
 
-<!-- NOTES -->
 <div class="card">
 
 <label>Notes</label>
@@ -463,16 +455,10 @@ placeholder="Enter customer name">
 
 </div>
 
-<!-- FOOTER -->
 <div class="footer">
 
-<button class="submitBtn" type="button" id="submitBtn">
-Submit
-</button>
-
-<button class="clearBtn" type="button" id="clearBtn">
-Clear Form
-</button>
+<button class="submitBtn" type="button" id="submitBtn">Submit</button>
+<button class="clearBtn" type="button" id="clearBtn">Clear Form</button>
 
 <div class="msg" id="msg"></div>
 
@@ -504,7 +490,6 @@ const el = {
   clearBtn: document.getElementById("clearBtn")
 };
 
-/* API */
 function api(params) {
   return fetch(API_URL + "?" + new URLSearchParams({
     key: API_KEY,
@@ -512,36 +497,57 @@ function api(params) {
   })).then(r => r.json());
 }
 
-/* AUTOCOMPLETE */
+/* =========================
+   DEBOUNCE + RACE CONTROL
+========================= */
+
+let debounceTimer = null;
+let latestRequestId = 0;
 let suppressAutocomplete = false;
+
+/* =========================
+   SEARCH (DEBOUNCED)
+========================= */
 
 el.name.addEventListener("input", () => {
 
   if (suppressAutocomplete) return;
 
-  const q = el.name.value.trim();
+  clearTimeout(debounceTimer);
 
-  if (!q) {
-    el.suggestions.style.display = "none";
-    return;
-  }
+  debounceTimer = setTimeout(() => {
 
-  api({ action: "searchClients", query: q })
-    .then(renderResults);
+    const q = el.name.value.trim();
+
+    if (!q) {
+      el.suggestions.style.display = "none";
+      return;
+    }
+
+    const requestId = ++latestRequestId;
+
+    api({ action: "searchClients", query: q })
+      .then(data => {
+
+        if (requestId !== latestRequestId) return;
+
+        renderResults(data);
+
+      });
+
+  }, 300);
 
 });
 
-/* FIX 1 ONLY */
+/* =========================
+   RENDER
+========================= */
+
 function renderResults(list) {
 
   el.suggestions.innerHTML = "";
 
-  if (!list || !list.length) {
-    el.suggestions.style.display = "none";
-    return;
-  }
-
-  const cleaned = list.filter(n =>
+  const cleaned = (list || []).filter(n =>
     n && n.toLowerCase() !== "recent"
   );
 
@@ -558,6 +564,7 @@ function renderResults(list) {
     div.onclick = () => {
 
       suppressAutocomplete = true;
+      latestRequestId++;
 
       el.name.value = n;
       el.suggestions.style.display = "none";
@@ -565,6 +572,7 @@ function renderResults(list) {
       load(n);
 
       setTimeout(() => suppressAutocomplete = false, 200);
+
     };
 
     el.suggestions.appendChild(div);
@@ -574,7 +582,10 @@ function renderResults(list) {
   el.suggestions.style.display = "block";
 }
 
-/* LOAD */
+/* =========================
+   LOAD
+========================= */
+
 async function load(nameVal) {
 
   const d = await api({
@@ -588,10 +599,12 @@ async function load(nameVal) {
   el.racket.value = d.racket || "";
   el.string.value = d.strings || "";
   el.tension.value = d.tension || "";
-  el.type.value = d.special_case || "";
 }
 
-/* FIX 2 ONLY */
+/* =========================
+   DATE FORMAT FIX
+========================= */
+
 function formatDDMMYYYY(date) {
   const dd = String(date.getDate()).padStart(2, "0");
   const mm = String(date.getMonth() + 1).padStart(2, "0");
@@ -599,7 +612,10 @@ function formatDDMMYYYY(date) {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-/* SUBMIT */
+/* =========================
+   SUBMIT
+========================= */
+
 document.getElementById("submitBtn")
 .addEventListener("click", async () => {
 
@@ -619,6 +635,7 @@ document.getElementById("submitBtn")
     notes: el.notes.value,
 
     handover_date: formatDDMMYYYY(new Date())
+
   };
 
   try {
@@ -631,16 +648,25 @@ document.getElementById("submitBtn")
     el.suggestions.style.display = "none";
 
   } catch (err) {
+
     el.msg.innerText = "Submission failed";
+
   }
 
 });
 
-/* CLEAR */
+/* =========================
+   CLEAR
+========================= */
+
 el.clearBtn.addEventListener("click", () => {
+
   el.form.reset();
+
   el.msg.innerText = "Cleared";
+
   el.suggestions.style.display = "none";
+
 });
 
 </script>
