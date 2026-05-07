@@ -267,6 +267,23 @@ const el = {
 };
 
 /* =========================
+   🚨 ENTER KEY BLOCK (MAIN FIX)
+========================= */
+
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+
+    const tag = document.activeElement.tagName.toLowerCase();
+
+    // allow Enter only in textarea
+    if (tag === "textarea") return;
+
+    e.preventDefault();
+    return false;
+  }
+});
+
+/* =========================
    STATE
 ========================= */
 
@@ -294,7 +311,7 @@ return fetch(url).then(r => r.json());
 }
 
 /* =========================
-   RECENTS TRACKING
+   RECENTS
 ========================= */
 
 function updateRecents(name) {
@@ -310,7 +327,7 @@ localStorage.setItem("recent_customers", JSON.stringify(recentCustomers));
 }
 
 /* =========================
-   AUTOCOMPLETE (RECENTS FIRST)
+   AUTOCOMPLETE (UNCHANGED)
 ========================= */
 
 el.name.addEventListener("focus", () => {
@@ -333,7 +350,6 @@ el.suggestions.innerHTML = "";
 
 let results = [];
 
-/* STEP 1: RECENTS FIRST */
 if (!query) {
 results = recentCustomers;
 } else {
@@ -342,15 +358,12 @@ n.toLowerCase().includes(query.toLowerCase())
 );
 }
 
-/* STEP 2: fallback API if nothing found */
 if (results.length === 0 && query) {
 
 api({
 action: "searchClients",
 query
-}).then(data => {
-renderAPI(data);
-});
+}).then(renderAPI);
 
 return;
 }
@@ -360,15 +373,11 @@ renderLocal(results);
 }
 
 function renderLocal(list) {
-
 renderListUI(list, true);
-
 }
 
 function renderAPI(list) {
-
 renderListUI(list, false);
-
 }
 
 function renderListUI(list, isLocal) {
@@ -380,7 +389,6 @@ el.suggestions.style.display = "none";
 return;
 }
 
-/* optional label */
 el.suggestions.innerHTML =
 "<div class='section-title'>" +
 (isLocal ? "Recent" : "Search Results") +
@@ -399,7 +407,6 @@ el.name.value = n;
 el.suggestions.style.display = "none";
 
 load(n);
-
 updateRecents(n);
 
 setTimeout(() => {
@@ -416,7 +423,6 @@ el.suggestions.style.display = "block";
 
 }
 
-/* hide */
 el.name.addEventListener("blur", () => {
 setTimeout(() => {
 el.suggestions.style.display = "none";
