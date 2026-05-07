@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+
+  <!-- iPhone safe -->
+  <meta name="viewport"
+        content="width=device-width,
+                 initial-scale=1,
+                 maximum-scale=1,
+                 user-scalable=no,
+                 viewport-fit=cover">
+
+  <title>🏸 Stringing Tracker</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+
+      width: 100%;
+      height: 100%;
+
+      overflow: hidden;
+
+      font-family: "Open Sans", sans-serif;
+
+      background: #f4f6fb;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .app {
+      width: 100vw;
+      height: 100vh;
+
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      text-align: center;
+      font-size: 34px;
+      font-weight: 800;
+      padding: 18px 12px 8px;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+
+      padding: 12px;
+
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: white;
+
+      border-radius: 18px;
+
+      padding: 14px;
+
+      box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    .row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .row > div {
+      flex: 1;
+    }
+
+    label {
+      display: block;
+
+      font-size: 15px;
+      font-weight: 700;
+
+      margin-bottom: 6px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+
+      padding: 14px;
+
+      font-size: 16px !important;
+
+      border-radius: 12px;
+
+      border: 1px solid #ddd;
+
+      font-family: "Open Sans", sans-serif;
+
+      outline: none;
+
+      background: white;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: none;
+    }
+
+    button {
+      width: 100%;
+
+      border: none;
+
+      border-radius: 16px;
+
+      padding: 18px;
+
+      font-size: 18px;
+      font-weight: 800;
+
+      background: linear-gradient(135deg, #7aa7ff, #b7a6ff);
+
+      color: white;
+    }
+
+    .footer {
+      padding: 12px;
+    }
+
+    .msg {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 13px;
+      color: green;
+    }
+
+    /* autocomplete */
+
+    .autocomplete {
+      position: relative;
+    }
+
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 4px);
+
+      left: 0;
+      right: 0;
+
+      background: white;
+
+      border-radius: 12px;
+
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+
+      overflow: hidden;
+
+      display: none;
+
+      z-index: 999;
+    }
+
+    .suggestions div {
+      padding: 12px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .suggestions div:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app">
+
+  <div class="header">
+    🏸 Stringing Tracker 🏸
+  </div>
+
+  <form id="form" class="app">
+
+    <div class="content">
+
+      <!-- NAME -->
+      <div class="card autocomplete">
+
+        <label>Name</label>
+
+        <input id="name"
+               name="client_name"
+               autocomplete="off">
+
+        <div id="suggestions"
+             class="suggestions"></div>
+
+      </div>
+
+      <!-- CLUB / RACKET -->
+      <div class="card row">
+
+        <div>
+          <label>Club</label>
+          <input id="club" name="club">
+        </div>
+
+        <div>
+          <label>Racket</label>
+          <input id="racket" name="racquet_name">
+        </div>
+
+      </div>
+
+      <!-- STRING / TENSION -->
+      <div class="card row">
+
+        <div>
+          <label>String</label>
+          <input id="strings" name="strings">
+        </div>
+
+        <div>
+          <label>Tension</label>
+          <input id="tension" name="tension">
+        </div>
+
+      </div>
+
+      <!-- PAID / TYPE -->
+      <div class="card row">
+
+        <div>
+          <label>Paid</label>
+
+          <select name="paid">
+            <option value="Yes">Yes</option>
+            <option value="Pending">Pending</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Type</label>
+
+          <select name="special_case">
+            <option value="">—</option>
+            <option value="1 String">1 String</option>
+            <option value="Cross -1">Cross -1</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- NOTES -->
+      <div class="card">
+
+        <label>Notes</label>
+
+        <textarea name="notes"></textarea>
+
+      </div>
+
+    </div>
+
+    <div class="footer">
+
+      <button type="submit">
+        Submit
+      </button>
+
+      <div id="msg" class="msg"></div>
+
+    </div>
+
+  </form>
+
+</div>
+
+<script>
+/* =========================
+   CONFIG
+========================= */
+
+const API_URL =
+"PASTE_YOUR_APPS_SCRIPT_URL_HERE";
+
+const API_KEY =
+"my-secret-key";
+
+/* =========================
+   AUTOCOMPLETE
+========================= */
+
+let timer = null;
+
+const nameInput =
+document.getElementById("name");
+
+const suggestions =
+document.getElementById("suggestions");
+
+nameInput.addEventListener("input", function () {
+
+  clearTimeout(timer);
+
+  const q = this.value.trim();
+
+  if (!q) {
+    suggestions.style.display = "none";
+    return;
+  }
+
+  timer = setTimeout(async () => {
+
+    const res = await fetch(API_URL, {
+      method: "POST",
+
+      headers: {
+        "Content-Type": "application/json"
+      },
+
+      body: JSON.stringify({
+        key: API_KEY,
+        action: "searchClients",
+        query: q
+      })
+    });
+
+    const data = await res.json();
+
+    renderSuggestions(data);
+
+  }, 300);
+
+});
+
+function renderSuggestions(list) {
+
+  suggestions.innerHTML = "";
+
+  if (!list || !list.length) {
+    suggestions.style.display = "none";
+    return;
+  }
+
+  list.forEach(name => {
+
+    const div =
+    document.createElement("div");
+
+    div.textContent = name;
+
+    div.onclick = () => {
+
+      nameInput.value = name;
+
+      suggestions.style.display = "none";
+
+      loadClient(name);
+    };
+
+    suggestions.appendChild(div);
+
+  });
+
+  suggestions.style.display = "block";
+}
+
+/* =========================
+   LOAD CLIENT
+========================= */
+
+async function loadClient(name) {
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify({
+      key: API_KEY,
+      action: "getClientHistory",
+      name
+    })
+  });
+
+  const d = await res.json();
+
+  if (!d) return;
+
+  club.value = d.club || "";
+  racket.value = d.racket || "";
+  strings.value = d.strings || "";
+  tension.value = d.tension || "";
+
+  document.querySelector(
+    '[name="special_case"]'
+  ).value = d.special_case || "";
+}
+
+/* =========================
+   SUBMIT
+========================= */
+
+document.getElementById("form")
+.addEventListener("submit",
+async function(e){
+
+  e.preventDefault();
+
+  const data =
+  Object.fromEntries(
+    new FormData(this).entries()
+  );
+
+  data.key = API_KEY;
+  data.action = "submit";
+
+  const res = await fetch(API_URL, {
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json"
+    },
+
+    body: JSON.stringify(data)
+  });
+
+  await res.json();
+
+  msg.innerText =
+    data.client_name + " saved";
+
+  this.reset();
+});
+</script>
+
+</body>
+</html>
