@@ -21,33 +21,22 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100%;
-  width: 100%;
-
   overflow: hidden;
   background: #f4f6fb;
-
   font-family: "Open Sans", sans-serif;
-
-  -webkit-text-size-adjust: 100%;
 }
 
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+* { box-sizing: border-box; }
 
 .app {
   max-width: 520px;
   height: 100dvh;
   margin: 0 auto;
-
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .header {
-  flex-shrink: 0;
   text-align: center;
   font-size: 22px;
   font-weight: 800;
@@ -61,7 +50,6 @@ html, body {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  min-height: 0;
 }
 
 .card {
@@ -76,36 +64,27 @@ html, body {
   gap: 8px;
 }
 
-.row > div {
-  flex: 1;
-}
+.row > div { flex: 1; }
 
 label {
-  display: block;
   font-size: 12px;
   font-weight: 700;
   margin-bottom: 4px;
+  display: block;
 }
 
 input, select, textarea {
   width: 100%;
   padding: 10px;
-  font-size: 16px !important;
+  font-size: 16px;
   border-radius: 10px;
   border: 1px solid #ddd;
-  outline: none;
 }
 
-textarea {
-  min-height: 60px;
-  resize: none;
-}
+textarea { min-height: 60px; }
 
 .footer {
-  flex-shrink: 0;
   padding: 8px;
-  position: sticky;
-  bottom: 0;
   background: #f4f6fb;
 }
 
@@ -116,36 +95,39 @@ button {
   padding: 14px;
   font-size: 18px;
   font-weight: 800;
-  background: linear-gradient(135deg,#7aa7ff,#b7a6ff);
   color: white;
+  margin-top: 6px;
+}
+
+.submitBtn {
+  background: linear-gradient(135deg,#7aa7ff,#b7a6ff);
+}
+
+.clearBtn {
+  background: #ddd;
+  color: #333;
 }
 
 .msg {
   text-align: center;
   font-size: 12px;
   margin-top: 6px;
-  color: green;
 }
 
-.autocomplete {
-  position: relative;
-}
+/* autocomplete */
+.autocomplete { position: relative; }
 
 .suggestions {
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-
   max-height: 180px;
   overflow-y: auto;
-
   display: none;
-  z-index: 1000;
 }
 
 .suggestions div {
@@ -170,36 +152,36 @@ button {
 
 <div class="card autocomplete">
   <label>Name</label>
-  <input id="inputName" autocomplete="off">
+  <input id="name">
   <div id="suggestions"></div>
 </div>
 
 <div class="card row">
   <div>
     <label>Club</label>
-    <input id="inputClub">
+    <input id="club">
   </div>
   <div>
     <label>Racket</label>
-    <input id="inputRacket">
+    <input id="racket">
   </div>
 </div>
 
 <div class="card row">
   <div>
     <label>String</label>
-    <input id="inputString">
+    <input id="string">
   </div>
   <div>
     <label>Tension</label>
-    <input id="inputTension">
+    <input id="tension">
   </div>
 </div>
 
 <div class="card row">
   <div>
     <label>Paid</label>
-    <select id="inputPaid">
+    <select id="paid">
       <option>Yes</option>
       <option>Pending</option>
     </select>
@@ -207,7 +189,7 @@ button {
 
   <div>
     <label>Type</label>
-    <select id="inputType">
+    <select id="type">
       <option value="">—</option>
       <option value="1 String">1 String</option>
       <option value="Cross -1">Cross -1</option>
@@ -217,14 +199,18 @@ button {
 
 <div class="card">
   <label>Notes</label>
-  <textarea id="inputNotes"></textarea>
+  <textarea id="notes"></textarea>
 </div>
 
 </div>
 
 <div class="footer">
-  <button type="submit">Submit</button>
-  <div id="msg" class="msg"></div>
+
+<button class="submitBtn" type="submit">Submit</button>
+<button class="clearBtn" type="button" id="clearBtn">Clear Form</button>
+
+<div class="msg" id="msg"></div>
+
 </div>
 
 </form>
@@ -239,25 +225,26 @@ const API_URL =
 const API_KEY = "my-secret-key";
 
 /* =========================
-   SAFE STATE REFERENCES
+   STATE
 ========================= */
 
 const el = {
-  name: document.getElementById("inputName"),
-  club: document.getElementById("inputClub"),
-  racket: document.getElementById("inputRacket"),
-  string: document.getElementById("inputString"),
-  tension: document.getElementById("inputTension"),
-  paid: document.getElementById("inputPaid"),
-  type: document.getElementById("inputType"),
-  notes: document.getElementById("inputNotes"),
+  name: document.getElementById("name"),
+  club: document.getElementById("club"),
+  racket: document.getElementById("racket"),
+  string: document.getElementById("string"),
+  tension: document.getElementById("tension"),
+  paid: document.getElementById("paid"),
+  type: document.getElementById("type"),
+  notes: document.getElementById("notes"),
   form: document.getElementById("form"),
   msg: document.getElementById("msg"),
-  suggestions: document.getElementById("suggestions")
+  suggestions: document.getElementById("suggestions"),
+  clearBtn: document.getElementById("clearBtn")
 };
 
 /* =========================
-   API WRAPPER
+   API (ONLINE FIRST, FALLBACK LOCAL)
 ========================= */
 
 function api(params) {
@@ -269,12 +256,55 @@ new URLSearchParams({
   ...params
 });
 
-return fetch(url).then(r => r.json());
+return fetch(url)
+.then(r => r.json())
+.catch(() => null); // offline fallback
 
 }
 
 /* =========================
-   AUTOCOMPLETE (SAFE)
+   OFFLINE CACHE
+========================= */
+
+function saveDraft() {
+
+localStorage.setItem("draft", JSON.stringify({
+  name: el.name.value,
+  club: el.club.value,
+  racket: el.racket.value,
+  string: el.string.value,
+  tension: el.tension.value,
+  paid: el.paid.value,
+  type: el.type.value,
+  notes: el.notes.value
+}));
+
+}
+
+function loadDraft() {
+
+const d = JSON.parse(localStorage.getItem("draft") || "{}");
+
+el.name.value = d.name || "";
+el.club.value = d.club || "";
+el.racket.value = d.racket || "";
+el.string.value = d.string || "";
+el.tension.value = d.tension || "";
+el.paid.value = d.paid || "Yes";
+el.type.value = d.type || "";
+el.notes.value = d.notes || "";
+
+}
+
+loadDraft();
+
+/* autosave */
+["input","change"].forEach(evt => {
+document.addEventListener(evt, saveDraft);
+});
+
+/* =========================
+   AUTOCOMPLETE (CACHE + API)
 ========================= */
 
 let timer;
@@ -285,17 +315,23 @@ clearTimeout(timer);
 
 const q = el.name.value.trim();
 
-if (!q) {
-  el.suggestions.style.display = "none";
-  return;
-}
+if (!q) return;
 
 timer = setTimeout(async () => {
 
-const data = await api({
-  action: "searchClients",
-  query: q
-});
+let data = JSON.parse(localStorage.getItem("clients") || "[]");
+
+if (!data.length) {
+  const res = await api({
+    action: "searchClients",
+    query: q
+  });
+
+  if (res) {
+    data = res;
+    localStorage.setItem("clients", JSON.stringify(res));
+  }
+}
 
 render(data);
 
@@ -308,8 +344,8 @@ function render(list) {
 el.suggestions.innerHTML = "";
 
 if (!list?.length) {
-  el.suggestions.style.display = "none";
-  return;
+el.suggestions.style.display = "none";
+return;
 }
 
 list.forEach(n => {
@@ -319,9 +355,9 @@ const div = document.createElement("div");
 div.textContent = n;
 
 div.onclick = () => {
-  el.name.value = n;
-  el.suggestions.style.display = "none";
-  load(n);
+el.name.value = n;
+el.suggestions.style.display = "none";
+load(n);
 };
 
 el.suggestions.appendChild(div);
@@ -329,20 +365,35 @@ el.suggestions.appendChild(div);
 });
 
 el.suggestions.style.display = "block";
+
 }
 
 /* =========================
-   PREFILL
+   PREFILL (CACHE FIRST)
 ========================= */
 
 async function load(nameVal) {
 
+const cache = JSON.parse(localStorage.getItem("history_" + nameVal) || "null");
+
+if (cache) {
+fill(cache);
+return;
+}
+
 const d = await api({
-  action: "getClientHistory",
-  name: nameVal
+action: "getClientHistory",
+name: nameVal
 });
 
-if (!d) return;
+if (d) {
+localStorage.setItem("history_" + nameVal, JSON.stringify(d));
+fill(d);
+}
+
+}
+
+function fill(d) {
 
 el.club.value = d.club || "";
 el.racket.value = d.racket || "";
@@ -363,38 +414,39 @@ e.preventDefault();
 el.msg.innerText = "Submitting...";
 
 const payload = {
-  action: "submit",
-  client_name: el.name.value,
-  club: el.club.value,
-  racquet_name: el.racket.value,
-  strings: el.string.value,
-  tension: el.tension.value,
-  paid: el.paid.value,
-  special_case: el.type.value,
-  notes: el.notes.value
+action: "submit",
+client_name: el.name.value,
+club: el.club.value,
+racquet_name: el.racket.value,
+strings: el.string.value,
+tension: el.tension.value,
+paid: el.paid.value,
+special_case: el.type.value,
+notes: el.notes.value
 };
-
-try {
 
 const res = await api(payload);
 
-if (res?.error) {
-  el.msg.innerText = res.error;
-  return;
+if (!res) {
+el.msg.innerText = "Offline mode (not saved)";
+return;
 }
 
 el.msg.innerText = payload.client_name + " saved";
 
+localStorage.removeItem("draft");
+
+});
+
+/* =========================
+   CLEAR FORM
+========================= */
+
+el.clearBtn.addEventListener("click", () => {
+
 el.form.reset();
-el.suggestions.style.display = "none";
-
-} catch (err) {
-
-console.log(err);
-
-el.msg.innerText = "Connection error";
-
-}
+localStorage.removeItem("draft");
+el.msg.innerText = "Form cleared";
 
 });
 
