@@ -18,179 +18,242 @@ viewport-fit=cover">
 <style>
 
 html, body {
-  margin: 0;
-  padding: 0;
 
-  width: 100%;
-  min-height: 100%;
+margin: 0;
+padding: 0;
 
-  overflow-x: hidden;
-  overflow-y: auto;
+width: 100%;
+height: 100%;
 
-  background: #f4f6fb;
+overflow: hidden;
 
-  font-family: "Open Sans", sans-serif;
+background: #f4f6fb;
 
-  -webkit-text-size-adjust: 100%;
+font-family: "Open Sans", sans-serif;
+
+-webkit-text-size-adjust: 100%;
+
 }
 
 * {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
+}
+
+body {
+display: flex;
+justify-content: center;
+align-items: center;
 }
 
 .app {
-  width: 100%;
-  min-height: 100vh;
 
-  display: flex;
-  flex-direction: column;
+width: 100%;
+max-width: 430px;
+
+height: 100vh;
+
+display: flex;
+flex-direction: column;
+
+overflow: hidden;
 }
 
 .header {
-  text-align: center;
 
-  font-size: 34px;
-  font-weight: 800;
+flex-shrink: 0;
 
-  padding: 18px 12px 8px;
+text-align: center;
+
+font-size: 24px;
+font-weight: 800;
+
+padding: 10px 8px 6px;
+
 }
 
 .content {
-  flex: 1;
 
-  overflow-y: auto;
+flex: 1;
 
-  padding: 12px;
+overflow-y: auto;
 
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+padding: 8px;
+
+display: flex;
+flex-direction: column;
+
+gap: 8px;
 }
 
 .card {
-  background: white;
 
-  border-radius: 18px;
+background: white;
 
-  padding: 14px;
+border-radius: 14px;
 
-  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+padding: 10px;
+
+box-shadow:
+0 4px 12px rgba(0,0,0,0.06);
+
 }
 
 .row {
-  display: flex;
-  gap: 12px;
+
+display: flex;
+gap: 8px;
+
 }
 
 .row > div {
-  flex: 1;
+flex: 1;
 }
 
 label {
-  display: block;
 
-  font-size: 15px;
-  font-weight: 700;
+display: block;
 
-  margin-bottom: 6px;
+font-size: 12px;
+font-weight: 700;
+
+margin-bottom: 4px;
+
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
 
-  width: 100%;
+width: 100%;
 
-  padding: 14px;
+padding: 10px 12px;
 
-  font-size: 16px !important;
+font-size: 16px !important;
 
-  border-radius: 12px;
+border-radius: 10px;
 
-  border: 1px solid #ddd;
+border: 1px solid #ddd;
 
-  outline: none;
+outline: none;
 
-  font-family: "Open Sans", sans-serif;
+background: white;
 
-  background: white;
+font-family: "Open Sans", sans-serif;
+
 }
 
 textarea {
-  min-height: 90px;
-  resize: none;
+
+min-height: 55px;
+resize: none;
+
 }
 
 .footer {
-  padding: 12px;
+
+flex-shrink: 0;
+
+padding: 8px;
+
+background: #f4f6fb;
+
+position: relative;
+
+z-index: 50;
+
 }
 
 button {
 
-  width: 100%;
+width: 100%;
 
-  border: none;
+border: none;
 
-  border-radius: 16px;
+border-radius: 14px;
 
-  padding: 18px;
+padding: 14px;
 
-  font-size: 18px;
-  font-weight: 800;
+font-size: 18px;
+font-weight: 800;
 
-  background: linear-gradient(
-    135deg,
-    #7aa7ff,
-    #b7a6ff
-  );
+background:
+linear-gradient(
+135deg,
+#7aa7ff,
+#b7a6ff
+);
 
-  color: white;
+color: white;
+
+cursor: pointer;
+
+position: relative;
+
+z-index: 9999;
+
 }
 
 .msg {
-  margin-top: 8px;
 
-  text-align: center;
+margin-top: 5px;
 
-  font-size: 13px;
+font-size: 12px;
 
-  color: green;
+text-align: center;
+
+color: green;
+
 }
 
 /* AUTOCOMPLETE */
 
 .autocomplete {
-  position: relative;
+position: relative;
 }
 
 .suggestions {
 
-  position: absolute;
+position: absolute;
 
-  top: calc(100% + 4px);
+top: calc(100% + 2px);
 
-  left: 0;
-  right: 0;
+left: 0;
+right: 0;
 
-  background: white;
+background: white;
 
-  border-radius: 12px;
+border-radius: 10px;
 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+box-shadow:
+0 4px 16px rgba(0,0,0,0.12);
 
-  overflow: hidden;
+overflow: hidden;
 
-  display: none;
+display: none;
 
-  z-index: 999;
+z-index: 999;
+
+max-height: 180px;
+
+overflow-y: auto;
 }
 
 .suggestions div {
-  padding: 12px;
-  border-bottom: 1px solid #eee;
+
+padding: 10px 12px;
+
+border-bottom:
+1px solid #eee;
+
+font-size: 14px;
+
+background: white;
+
 }
 
 .suggestions div:last-child {
-  border-bottom: none;
+border-bottom: none;
 }
 
 </style>
@@ -208,6 +271,8 @@ button {
 
 <div class="content">
 
+<!-- NAME -->
+
 <div class="card autocomplete">
 
 <label>Name</label>
@@ -224,6 +289,8 @@ class="suggestions">
 
 </div>
 
+<!-- CLUB + RACKET -->
+
 <div class="card row">
 
 <div>
@@ -238,6 +305,8 @@ class="suggestions">
 
 </div>
 
+<!-- STRING + TENSION -->
+
 <div class="card row">
 
 <div>
@@ -251,6 +320,8 @@ class="suggestions">
 </div>
 
 </div>
+
+<!-- PAID + TYPE -->
 
 <div class="card row">
 
@@ -271,13 +342,19 @@ class="suggestions">
 
 <select name="special_case">
 <option value="">—</option>
-<option value="1 String">1 String</option>
-<option value="Cross -1">Cross -1</option>
+<option value="1 String">
+1 String
+</option>
+<option value="Cross -1">
+Cross -1
+</option>
 </select>
 
 </div>
 
 </div>
+
+<!-- NOTES -->
 
 <div class="card">
 
@@ -333,13 +410,17 @@ const q =
 this.value.trim();
 
 if (!q) {
-  suggestions.style.display =
-  "none";
-  return;
+
+suggestions.style.display =
+"none";
+
+return;
 }
 
 timer =
 setTimeout(async () => {
+
+try {
 
 const res =
 await fetch(API_URL, {
@@ -364,7 +445,11 @@ await res.json();
 
 renderSuggestions(data);
 
-}, 300);
+} catch(err) {
+console.log(err);
+}
+
+}, 350);
 
 });
 
@@ -412,6 +497,8 @@ suggestions.style.display =
 
 async function loadClient(name) {
 
+try {
+
 const res =
 await fetch(API_URL, {
 
@@ -451,6 +538,11 @@ document.querySelector(
 '[name="special_case"]'
 ).value =
 d.special_case || "";
+
+} catch(err) {
+console.log(err);
+}
+
 }
 
 /* =========================
@@ -464,6 +556,8 @@ document
 async function(e){
 
 e.preventDefault();
+
+try {
 
 const data =
 Object.fromEntries(
@@ -487,13 +581,28 @@ body: JSON.stringify(data)
 
 });
 
+const result =
 await res.json();
+
+console.log(result);
 
 msg.innerText =
 data.client_name +
 " saved";
 
 this.reset();
+
+suggestions.style.display =
+"none";
+
+} catch(err) {
+
+console.log(err);
+
+msg.innerText =
+"Connection failed";
+
+}
 
 });
 
